@@ -15,11 +15,37 @@ Where `YEAR` is a four-digit number, `MONTH` and `DAY` are both two-digit number
 Jekyll also offers powerful support for code snippets:
 
 {% highlight ruby %}
-def print_hi(name)
-  puts "Hi, #{name}"
+class UsersController < ApplicationController
+def export
+    @user = ...
+
+    html_relative = UsersController.render(
+      template: 'users/export',
+      layout: 'pdf',
+      assigns: { user: @user }
+    )
+    base_url = "http://localhost:3000/"
+    html_absolute = Grover::HTMLPreprocessor.process html_relative, base_url, "http"
+    pdf = Grover.new(html_absolute, {
+      format: 'A4', 
+      display_url: base_url
+    }).to_pdf
+
+    send_data pdf, type: 'application/pdf; charset=binary', filename: "test.pdf"
+  end
 end
-print_hi('Tom')
-#=> prints 'Hi, Tom' to STDOUT.
+
+{% endhighlight %}
+
+{% highlight shell %}
+# If not running interactively, don't do anything
+[[ -z "$PS1" ]] && return
+sudo apt install test
+{% endhighlight %}
+
+{% highlight javascript %}
+ar.map((e) => e.length)
+
 {% endhighlight %}
 
 Check out the [Jekyll docs][jekyll-docs] for more info on how to get the most out of Jekyll. File all bugs/feature requests at [Jekyll’s GitHub repo][jekyll-gh]. If you have questions, you can ask them on [Jekyll Talk][jekyll-talk].

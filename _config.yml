@@ -29,6 +29,9 @@ github_username:  dvergeylen
 
 # Build settings
 theme: minima
+highlighter: rouge
+sass:
+    sass_dir: _scss
 plugins:
   - jekyll-feed
 
