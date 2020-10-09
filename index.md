@@ -5,9 +5,10 @@
 layout: home
 ---
 
-Welcome to my Home Page. This is a test!
+## Hi, I'm Daniel Vergeylen! 👋
 
-{% assign date = '2020-04-13T10:20:00Z' %}
+I am an entrepreneur & HW/SW freelance developer. I care a lot about technology, Linux and Online Privacy. I'm a proud shareholder of [SigmaDelta.io](https://sigmadelta.io), a company I founded in 2018.
 
-- Original date - {{ date }}
-- With timeago filter - {{ date | timeago }}
+You can contact me on <a href="mailto:blog@sigmadelta.io?subject=Hi Daniel">blog@sigmadelta.io</a> or via Twitter <a href="https://twitter.com/dvergeylen">@dvergeylen</a>
+
+This blog is a mix of personal notes, detailed how-tos and various pro tips I compile over time. Hope you will find something useful!
