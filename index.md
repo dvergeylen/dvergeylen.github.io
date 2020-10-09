@@ -11,4 +11,4 @@ I am an entrepreneur & HW/SW freelance developer. I care a lot about technology,
 
 You can contact me on <a href="mailto:blog@sigmadelta.io?subject=Hi Daniel">blog@sigmadelta.io</a> or via Twitter <a href="https://twitter.com/dvergeylen">@dvergeylen</a>
 
-This blog is a mix of personal notes, detailed how-tos and various pro tips I compile over time. Hope you will find something useful!
+This blog is a mix of personal notes, detailed how-tos and various things I learned over time. Hope you will find something useful!
