@@ -5,19 +5,20 @@
   --flashy-purple: #ae81ff;
   --flashy-pink: #f92672;
   --grey: #75715e;
+  --lighter-grey: #a6a6a6;
   --anthracite: #272822;
   --sand: #f8f8f2;
 }
 
 .highlighter-rouge .highlight {
   background-color: var(--anthracite);
-  color: var(--grey);
+  color: lighter(var(--lighter-grey));
 }
 
 .highlight {
   pre, code {
     background-color: var(--anthracite);
-    color: var(--grey);
+    color: var(--lighter-grey);
     border: none;
     border-radius: 0;
   }
