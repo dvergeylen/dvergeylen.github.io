@@ -44,7 +44,7 @@ Unzip the file, you'll end up with an img file like `Tinker_Board-Debian-Stretch
 
 #### Putting the image on the SD Card
 
-To transfer the `.img` content from your hard drive to the SDCard, copy its content via the `dd` command (Linux). Be aware you have to know which device name your SD card receives from the OS, your mileage may vary. The best way to know is probably to `ls /dev` folder, then insert the SD Card, and `ls` it again. The newly added device is your SD Card. If your SD Card has multiple partition they will appear with as suffix likde `/dev/mmcblk0p1`, `/dev/mmcblk0p2`, ... We are only interested in the device name, **not** the partition name(s).
+To transfer the `.img` content from your hard drive to the SDCard, copy its content via the `dd` command (Linux). Be aware you have to know which device name your SD card receives from the OS, your mileage may vary. The best way to know is probably to `ls /dev` folder, then insert the SD Card, and `ls` it again. The newly added device is your SD Card. If your SD Card has multiple partition they will appear with as suffix like `/dev/mmcblk0p1`, `/dev/mmcblk0p2`, ... We are only interested in the device name, **not** the partition name(s).
 
 ```bash
 # Transfer the .img content to SD Card
