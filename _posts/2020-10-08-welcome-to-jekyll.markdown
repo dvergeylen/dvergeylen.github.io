@@ -16,7 +16,7 @@ Jekyll also offers powerful support for code snippets:
 
 {% highlight ruby %}
 class UsersController < ApplicationController
-def export
+  def export
     @user = ...
 
     html_relative = UsersController.render(

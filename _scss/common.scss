@@ -1,0 +1,14 @@
+:root {
+  --gold: #ffbd00;
+  --background-yellow: #fffae2;
+}
+
+.warning {
+  background-color: var(--background-yellow);
+  border: 2px solid var(--gold);
+  padding: 1em;
+}
+
+.post-content h5 {
+  font-size: 18px;
+}

@@ -9,10 +9,17 @@
   --sand: #f8f8f2;
 }
 
+.highlighter-rouge .highlight {
+  background-color: var(--anthracite);
+  color: var(--grey);
+}
+
 .highlight {
   pre, code {
     background-color: var(--anthracite);
     color: var(--grey);
+    border: none;
+    border-radius: 0;
   }
   .hll { background-color: var(--anthracite); }
   .c { color: var(--grey) } /* Comment */
