@@ -3,7 +3,7 @@ layout: post
 title:  "Gcc / Clang best practices"
 date:   2020-11-19 12:30:00 +0200
 categories: programming compiler
-permalink: /gcc-best-practices
+permalink: /gcc-most-common-used-flags
 ---
 
 #### Introduction
@@ -13,7 +13,7 @@ In this blog post / reference page I'll describe what I consider best practices,
 
 I'll regularly update this post as far as I find time to cover the needed material to become confident when compiling with `gcc` / `clang`.
 
-#### gcc ⚔️ clang ⚔️ ...?
+#### Gcc vs clang vs ...?
 I've heard this many times. Which one is better / faster / stronger? Ill-posed problem! If you are trying to oppose them against each other you are doing it wrong! 🙅
 
 They can both reveal sometimes better, sometimes worse. Same applies to other compilers. I'm not talking about the binaries they produce (although observing significant performance or size differences between binaries from multiple compilers can put under the spotlight some code weaknesses or at least some weirdness because that mean they all not interpret your code the same way → most probably code smell 🧦) but about the (debug) information they can provide.
@@ -22,7 +22,7 @@ The best practice I use is that I compile my code with them **both** (well, not 
 
 Don't oppose compilers between each other, embrace their differences. Having your code compiling on many of them is a very good sign your code is portable and respects standards.
 
-### Useful gcc flags
+### Most common gcc flags
 You can install `gcc` man-pages via `sudo apt install gcc-doc`.
 
 GCC compilation flags are grouped by usage in `man gcc`. Among all the categories, the first one to consider is: **Warning Options**.
@@ -58,6 +58,11 @@ gcc -Wall -Werror ... -Ipath/to/header/files -Lpath/to/library/locations -lmylib
 
 You can use `-I`, `-L` and `-l` flags multiple times.
 
+<p class="warning">
+  <strong>🧐 Should I fix warnings from third-party libraries?</strong><br />
+  Compiling with <code>-Werror</code> can be cumbersome when using third party libraries. These libraries can generate some warnings and your code won't compile. Although you can post Pull Requests to fix them (if this is relevant) you might also consider life is what it is and you can't do anything about these warnings. The easiest solution is to include them as system libraries with <code>-isystem</code> instead of <code>-I</code>. GCC will know you can't do anything about the source code from these and won't bother you anymore. Neat!
+</p>
+
 #### pkg-config to the rescue
 Knowing headers / lib files locations can be difficult when compiling on multiple platforms / OSes. `pkg-config` can help you by outputting compiler flags configured with their correct location on the local system. For instance:
 
@@ -80,8 +85,8 @@ EXEC=my_output
 CC=g++
 DEBUGFLAGS=-g -Wpedantic -pedantic-errors
 CPPFLAGS=-Wall -Werror -Wextra -Wfatal-errors
-IFLAGS=$(shell pkg-config --cflags)
-LFLAGS=$(shell pkg-config --libs)
+IFLAGS=$(shell pkg-config --cflags libcurl)
+LFLAGS=$(shell pkg-config --libs libcurl)
 
 all: $(EXEC)
 
