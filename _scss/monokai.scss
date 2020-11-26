@@ -14,8 +14,8 @@
   --color01: #e3ded9; // #f07024;
   --color02: #cb7833;
   --color03: #e6db74;
-  --color04: #ae81ff;
-  --color05: #f92672;
+  --color04: #a5c261;
+  --color05: #fbc36b;
   --color06: #75715e;
   --color07: #a6a6a6;
   --color08: #272822;
@@ -41,7 +41,7 @@
   .l { color: var(--color04) } /* Literal */
   .n { color: var(--color09) } /* Name */
   .o { color: var(--color05) } /* Operator */
-  .p { color: var(--color09) } /* Punctuation */
+  .p { color: var(--color05) } /* Punctuation */
   .cm { color: var(--color06) } /* Comment.Multiline */
   .cp { color: var(--color06) } /* Comment.Preproc */
   .c1 { color: var(--color06) } /* Comment.Single */
