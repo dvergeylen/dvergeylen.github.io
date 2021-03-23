@@ -23,7 +23,8 @@ In this long post, I'll describe how to configure a single board computer such a
   * [Securing Official image ](#securing-official-image)(removing clunky pre-installed configs to strengthen the installation)
 * [PART 2](/self-hosted-nextcloud-on-sbc-complete-guide-part2):
   * [Partitioning a read-only root](/self-hosted-nextcloud-on-sbc-complete-guide-part2#read-only-root) (via `overlayroot`)
-  * [*(Optional)* installing a self-compiled kernel from kernel.org](/self-hosted-nextcloud-on-sbc-complete-guide-part2) (😎!)
+  * [*(Optional)* installing a self-compiled kernel from kernel.org](/self-hosted-nextcloud-on-sbc-complete-guide-part2#compiling-a-vanilla-kernel-from-kernelorg-) (😎!)
+  * [Strengthening the read-only](/self-hosted-nextcloud-on-sbc-complete-guide-part2#strengthening-the-read-only)
 * PART 3:
   * [Installing + configuring MariaDB]()
   * [Installing Nextcloud pre-requisites]()
