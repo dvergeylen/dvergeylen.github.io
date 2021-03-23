@@ -1,7 +1,7 @@
 :root {
   /* Monokai */
   // --color01: #a6e22e;
-  // --color02 : #66d9ef;
+  // --color02: #66d9ef;
   // --color03: #e6db74;
   // --color04: #ae81ff;
   // --color05: #f92672;
@@ -9,17 +9,30 @@
   // --color07: #a6a6a6;
   // --color08: #272822;
   // --color09: #f8f8f2;
+  // --color10: #49483e;
 
   /* Railscast */
-  --color01: #e3ded9; // #f07024;
-  --color02: #cb7833;
-  --color03: #e6db74;
-  --color04: #a5c261;
-  --color05: #fbc36b;
-  --color06: #75715e;
+  // --color01: #e3ded9;
+  // --color02: #cb7833;
+  // --color03: #e6db74;
+  // --color04: #a5c261;
+  // --color05: #fbc36b;
+  // --color06: #75715e;
+  // --color07: #a6a6a6;
+  // --color08: #272822;
+  // --color09: #d3381e;
+
+  /* Alacritty */
+  --color01: #b9ca4a;
+  --color02: #70c0ba;
+  --color03: #e6c547;
+  --color04: #c397d8;
+  --color05: #d54e53;
+  --color06: #7aa6da;
   --color07: #a6a6a6;
-  --color08: #272822;
-  --color09: #d3381e;
+  --color08: #222;
+  --color09: #f8f8f2;
+  --color10: #49483e;
 }
 
 .highlighter-rouge .highlight {
@@ -29,7 +42,7 @@
 
 .highlight {
   pre, code {
-    background-color: var(--color08);
+    background-color: var(--color08); // var(--color10);
     color: var(--color07);
     border: none;
     border-radius: 0;
