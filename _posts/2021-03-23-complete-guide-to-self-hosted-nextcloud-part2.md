@@ -170,3 +170,8 @@ mount
 # [...]
 ```
 Which is indeed read-only! 😎
+
+
+## Next
+
+See [PART 3](/self-hosted-nextcloud-on-sbc-complete-guide-part3)

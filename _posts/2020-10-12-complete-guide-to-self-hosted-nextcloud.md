@@ -25,12 +25,11 @@ In this long post, I'll describe how to configure a single board computer such a
   * [Partitioning a read-only root](/self-hosted-nextcloud-on-sbc-complete-guide-part2#read-only-root) (via `overlayroot`)
   * [*(Optional)* installing a self-compiled kernel from kernel.org](/self-hosted-nextcloud-on-sbc-complete-guide-part2#compiling-a-vanilla-kernel-from-kernelorg-) (😎!)
   * [Strengthening the read-only](/self-hosted-nextcloud-on-sbc-complete-guide-part2#strengthening-the-read-only)
-* PART 3:
-  * [Installing + configuring MariaDB]()
-  * [Installing Nextcloud pre-requisites]()
-  * [Installing Nextcloud 20+]()
-  * [Configuring Nginx or Apache2 in front of it]()
-  * [Tuning and tweaking Nextcloud 20+ freshly installed]()
+* [PART 3](/self-hosted-nextcloud-on-sbc-complete-guide-part3):
+  * [Installing + configuring MariaDB](/self-hosted-nextcloud-on-sbc-complete-guide-part3#installing-mariadb)
+  * [Installing Nextcloud 20+](/self-hosted-nextcloud-on-sbc-complete-guide-part3#installing-nextcloud)
+  * [Configuring Nginx or Apache2 in front of it](/self-hosted-nextcloud-on-sbc-complete-guide-part3)
+  * [Tuning and tweaking Nextcloud 20+ freshly installed](/self-hosted-nextcloud-on-sbc-complete-guide-part3)
 * Part 4:
   * [Installing Let's Encrypt SSL wildcards certificates]()
   * [Setting up Dynhost via `ddclient`]()
