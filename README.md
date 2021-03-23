@@ -1,16 +1,15 @@
-### Hi there 👋
+### ✨ Daniel Vergeylen's personal blog
 
-<!--
-**dvergeylen/dvergeylen** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+Hi! This is my personal website's source code, hosted at https://dvergeylen.github.io.
 
-Here are some ideas to get you started:
+You can run it locally via (needs Ruby):
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+```bash
+git clone https://github.com/dvergeylen/dvergeylen.github.io
+
+cd dvergeylen.github.io
+bundle install
+bundle exec jekyll serve
+
+# Open a browser and go to: http://127.0.0.1:4000/
+```
