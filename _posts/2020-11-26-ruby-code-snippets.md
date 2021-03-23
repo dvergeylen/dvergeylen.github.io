@@ -7,7 +7,7 @@ permalink: /ruby-code-snippets
 ---
 
 #### Introduction
-Here are common ruby patterns I use all the time, mainly in Rails apps.
+Here are common Ruby patterns I use all the time, mainly in Rails apps.
 Working on already fetched data is far more efficient than doing multiple queries, especially if the number of entries is rather "small" (to be defined, depends on your application).
 
 I avoid using `.group_by` as much as I can as it can be very slow, depending on what Ruby can eager load. Doing something like `User.last(1000).group_by(&:team_id)` is different from `User.last(1000).group_by(&:team)`, the former grouping wrt an integer, the latter with an object! The latter will be very slow as it doesn't eager load it and you will end up with an [N+1 problem](https://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations).
