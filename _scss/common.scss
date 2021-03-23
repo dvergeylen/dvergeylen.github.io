@@ -1,11 +1,20 @@
 :root {
   --gold: #ffbd00;
   --background-yellow: #fffae2;
+
+  --background-blue: #DEEAF9;
+  --blue:  #266ECC;
 }
 
 .warning {
   background-color: var(--background-yellow);
   border: 2px solid var(--gold);
+  padding: 1em;
+}
+
+.info {
+  background-color: var(--background-blue);
+  border: 2px solid var(--blue);
   padding: 1em;
 }
 
