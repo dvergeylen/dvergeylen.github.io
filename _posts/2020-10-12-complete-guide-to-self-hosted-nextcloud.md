@@ -1,36 +1,46 @@
 ---
 layout: post
-title:  "Self hosted Nextcloud 20+ installation on a single board computer: a complete guide"
+title:  "[1/5] Self hosted Nextcloud 20+"
 date:   2020-10-12 12:30:00 +0200
 categories: nextcloud embedded linux
+permalink: /self-hosted-nextcloud-on-sbc-complete-guide-part1
+last_update: 2021-03-23 12:30:00 +0200
 ---
 
-Last update: **{{ page.date | date: "%B %d, %Y %H:%m" }}**
+Last update: **{{ page.last_update | date: "%B %d, %Y %H:%m" }}**
 
-### Introduction
+
+<p class="info">
+  📚 Installation on a single board computer: a complete guide
+</p>
+
+## Introduction
 In this long post, I'll describe how to configure a single board computer such as the **Raspberry Pi** or the **Asus Tinker Board** from A to Z to support a self-hosted Nextcloud 20+ instance. We'll go through the following steps:
 
-* Installing Official image
-* Cleaning up Official image (becoming a minimal installation)
-* Securing Official image (removing clunky pre-installed configs to strengthen the installation)
-* Partitioning and configuration of a read-only root (via `overlayroot`)
-* *[Optional]* installing a self-compiled kernel from kernel.org (😎!)
-* Installing + configuring MariaDB
-* Installing Nextcloud pre-requisites
-* Installing Nextcloud 20+
-* Configuring Nginx or Apache2 in front of it
-* Tuning and tweaking Nextcloud 20+ freshly installed
-* Installing Let's Encrypt SSL wildcards certificates
-* Setting up Dynhost via `ddclient`
-* Bonus: updating Nextcloud despite read-only root
-* Bonus: making incremental `rsync` backups
-* **Bonus: Backup your SD Card** (do that regularly while going through this guide)
+* PART 1:
+  * [Installing Official image](#installing-official-image)
+  * [Cleaning up Official image](#cleaning-up-official-image) (becoming a minimal installation)
+  * [Securing Official image ](#securing-official-image)(removing clunky pre-installed configs to strengthen the installation)
+* [PART 2](/self-hosted-nextcloud-on-sbc-complete-guide-part2):
+  * [Partitioning a read-only root](/self-hosted-nextcloud-on-sbc-complete-guide-part2#read-only-root) (via `overlayroot`)
+  * [*(Optional)* installing a self-compiled kernel from kernel.org](/self-hosted-nextcloud-on-sbc-complete-guide-part2) (😎!)
+* PART 3:
+  * [Installing + configuring MariaDB]()
+  * [Installing Nextcloud pre-requisites]()
+  * [Installing Nextcloud 20+]()
+  * [Configuring Nginx or Apache2 in front of it]()
+  * [Tuning and tweaking Nextcloud 20+ freshly installed]()
+* Part 4:
+  * [Installing Let's Encrypt SSL wildcards certificates]()
+  * [Setting up Dynhost via `ddclient`]()
+* Part 5:
+  * [Bonus: updating Nextcloud despite read-only root]()
+  * [Bonus: making incremental `rsync` backups]()
+  * [**Bonus: Backup your SD Card**]() (do that regularly while going through this guide)
 
 My personal board is an Asus Tinker Board, but I've played with Raspberry Pi 4s as well before, and the procedure is roughly the same (>90%). I'll describe the differences when they arise (mainly at the image installation and cleanup steps).
 
-## Part 1: Minimal Image installation
-
-### Installing official image
+## Installing official image
 
 #### Raspberry pi
 Download [Raspberry Pi OS (32-bit) Lite](https://www.raspberrypi.org/downloads/raspberry-pi-os/) image.
@@ -44,7 +54,7 @@ Unzip the file; you'll end up with an .img file like `Tinker_Board-Debian-Stretc
 
 #### Putting the image on the SD Card
 
-To transfer the `.img` content from your hard drive to the SDCard, copy its content via the `dd` command (Linux). Be aware you have to know which device name your SD card receives from the OS, your mileage may vary. The best way to know is probably to `ls /dev` folder, then insert the SD Card, and `ls` it again. The newly added device is your SD Card. If your SD Card has multiple partition, they will appear with as suffix like `/dev/mmcblk0p1`, `/dev/mmcblk0p2`, ... We are only interested in the device name, **not** the partition name(s).
+To transfer the `.img` content from your hard drive to the SDCard, copy its content via the `dd` command (Linux). Be aware you have to know which device name your SD card receives from the OS, **your mileage may (will) vary**. The best way to know is probably to `ls /dev` folder, then insert the SD Card, and `ls` it again. The newly added device is your SD Card (e.g. `/dev/mmcblk0`). If your SD Card has multiple partition, they will appear with as suffix like `pX` (e.g: `/dev/mmcblk0p1`, `/dev/mmcblk0p2`, ...). We are only interested in the device name (e.g. `/dev/mmcblk0`), **not** the partition name(s).
 
 ```bash
 # Transfer the .img content to SD Card
@@ -54,13 +64,13 @@ sudo sh -c 'cat Tinker_Board-Debian-Stretch-V2.1.16-20200813.img > /dev/mmcblk0'
 
 Once done, starting `gparted` can be handy to extend the copied partition. SD Cards have > than 16Gb by now, and the copied image is a 2Gb partition.
 
-### Cleaning up official image
+## Cleaning up official image
 
 #### First Boot
 🥳 Hooray, your SD Card is ready to go! Let's (u-)boot now! 🎉
 
 <p class="warning">
-  You'll need a solid Power Supply, preferably 5V 3A. 2A isn't enough to power an external hard drive. You'll notice some shortages and weird behaviors if your power supply isn't powerful enough. I've experienced this with <strong>both</strong> Raspberry Pi and TinkerBoard!
+  You'll need a solid Power Supply, preferably 5V 3A. 2A isn't enough to power an external hard drive that has no external power supply. You'll notice some shortages and weird behaviors if your power supply isn't powerful enough. I've experienced this with <strong>both</strong> Raspberry Pi and TinkerBoard!
 </p>
 
 ```bash
@@ -122,7 +132,7 @@ This is VERY EFFECTIVE! [source](https://unix.stackexchange.com/questions/424969
 
 You now have a minimal install 😎.
 
-### Securing official image
+## Securing official image
 
 ##### Updating root password
 ```bash
@@ -146,8 +156,6 @@ PermitRootLogin no
 Other ssh tweaks can be found [here](https://www.digitalocean.com/community/tutorials/ssh-essentials-working-with-ssh-servers-clients-and-keys).
 
 
-### Part 2: Read-only root
+## Next
 
-The next part will cover how to set up a read-only `/` (soon).
-
-
+See [PART 2](/self-hosted-nextcloud-on-sbc-complete-guide-part2)
