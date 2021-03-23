@@ -34,8 +34,9 @@ In this long post, I'll describe how to configure a single board computer such a
 * Part 4:
   * [Installing Let's Encrypt SSL wildcards certificates]()
   * [Setting up Dynhost via `ddclient`]()
-* Part 5:
-  * [Bonus: updating Nextcloud despite read-only root]()
+* [PART 5](/self-hosted-nextcloud-on-sbc-complete-guide-part5):
+  * [Deactivating readonly root](/self-hosted-nextcloud-on-sbc-complete-guide-part5#deactivate-read-only-root)
+  * [Updates despite read-only root](/self-hosted-nextcloud-on-sbc-complete-guide-part5)
   * [Bonus: making incremental `rsync` backups]()
   * [**Bonus: Backup your SD Card**]() (do that regularly while going through this guide)
 

@@ -11,7 +11,7 @@ permalink: /self-hosted-nextcloud-on-sbc-complete-guide-part2
 * PART 2 ← You are here 🙂
 * [PART 3](/self-hosted-nextcloud-on-sbc-complete-guide-part3)
 * PART 4
-* PART 5
+* [PART 5](/self-hosted-nextcloud-on-sbc-complete-guide-part5)
 
 ## Read only root
 A read only root partition is very useful when running a web server from a single board computer, as it will dramatically decrease the number of writes on the SDCard (which is the usual point-of-failure). Inexperienced users will usually encounter no problem installing and exposing a web server to the Internet but will most probably see serious damages on their SD Card a few months later. This is due to incoming Internet traffic (legit one but also bots, ...) that will lead to spurious writes on the SDCard. Setting the root file system as read only non only prevents such writes but also avoids the necessity to track which processes are trying to write whatever information.
