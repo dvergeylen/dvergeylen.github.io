@@ -9,7 +9,7 @@ permalink: /self-hosted-nextcloud-on-sbc-complete-guide-part2
 ## See also
 * [PART 1](/self-hosted-nextcloud-on-sbc-complete-guide-part1)
 * PART 2 ← You are here 🙂
-* PART 3
+* [PART 3](/self-hosted-nextcloud-on-sbc-complete-guide-part3)
 * PART 4
 * PART 5
 
@@ -133,7 +133,7 @@ mount
 
 Yeah 😎!
 
-#### Strengthening the read only
+## Strengthening the read only
 Although overlayFS doesn't make more than necessary use of SDCard, `overlayroot` mounts it in `/media/root-ro` with default options. This includes `rw` and `relatime`, which doesn't prevent writes on the partition.
 
 To enforce the read-only status of the parititon, we can write a script to remount `/media/root-ro` in read only mode if appears in `mount` output.
