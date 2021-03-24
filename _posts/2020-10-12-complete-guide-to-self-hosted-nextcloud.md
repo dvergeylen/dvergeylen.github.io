@@ -36,10 +36,9 @@ In this long post, I'll describe how to configure a single board computer such a
   * [Installing Let's Encrypt SSL wildcard certificates](/self-hosted-nextcloud-on-sbc-complete-guide-part4#lets-encrypt-tls-certificate)
   * [Dynamic host via `ddclient`](/self-hosted-nextcloud-on-sbc-complete-guide-part4#dynamic-host-via-ddclient)
 * [PART 5](/self-hosted-nextcloud-on-sbc-complete-guide-part5):
-  * [Deactivating readonly root](/self-hosted-nextcloud-on-sbc-complete-guide-part5#deactivate-read-only-root)
-  * [Updates despite read-only root](/self-hosted-nextcloud-on-sbc-complete-guide-part5)
-  * [Bonus: making incremental `rsync` backups]()
-  * [**Bonus: Backup your SD Card**]() (do that regularly while going through this guide)
+  * [Remounting as a read/write FS](/self-hosted-nextcloud-on-sbc-complete-guide-part5#deactivate-read-only-root)
+  * [Updating Nextcloud](/self-hosted-nextcloud-on-sbc-complete-guide-part5)
+  * [**Backuping your SD Card**]() (do that regularly while going through this guide)
 
 My personal board is an Asus Tinker Board, but I've played with Raspberry Pi 4s as well before, and the procedure is roughly the same (>90%). I'll describe the differences when they arise (mainly at the image installation and cleanup steps).
 
