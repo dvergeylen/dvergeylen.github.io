@@ -32,8 +32,17 @@ body {
   }
 
   .wrapper {
-    width: 80%;
-    max-width: 55em;
+    /* Mobile */
+    @media screen and (max-width: 768px) {
+      width: 90%;
+      margin: auto;
+      padding: 0;
+    }
+    /* Desktop */
+    @media screen and (min-width: 768px) {
+      width: 80%;
+      max-width: 55em;
+    }
   }
   a.post-link {
     display: inline;
