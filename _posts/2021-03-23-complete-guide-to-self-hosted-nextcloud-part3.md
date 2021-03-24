@@ -171,7 +171,7 @@ sudo mv nextcloud /var/www/
 sudo chown -R www-data:www-data /var/www/nextcloud
 sudo chmod 0770 /var/www/nextcloud
 sudo chmod 0770 /media/data/nextcloud/
-# Ensuite: https://docs.nextcloud.com/server/latest/admin_manual/installation/command_line_installation.html
+# See: https://docs.nextcloud.com/server/latest/admin_manual/installation/command_line_installation.html
 
 # Launch Nextcloud install script via the following command :
 # Adapt $DATABASE_PWD, $ADMIN_LOGIN and $ADMIN_PWD accordingly
@@ -198,6 +198,7 @@ Yeah 😎!
 * I've replaced the SSL Certificates path with `/path/to/XXX` for now.
 
   ![SSL Labs A+ Score](assets/images/nextcloud/SSLLabs_Aplus.png)
+  *SSL Labs Test Score: A+*
 
 
 ```
