@@ -31,6 +31,14 @@ body {
     margin-bottom: 0.2em;
   }
 
+  /* Center image + caption */
+  p  img + em {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--color10);
+  }
+
   .wrapper {
     /* Mobile */
     @media screen and (max-width: 768px) {
