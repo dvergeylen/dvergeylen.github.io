@@ -19,7 +19,7 @@ Last update: **{{ page.last_update | date: "%B %d, %Y %H:%m" }}**
 ## Introduction
 In this long post, I'll describe how to configure a single board computer such as the **Raspberry Pi** or the **Asus Tinker Board** from A to Z to support a self-hosted Nextcloud 20+ instance. We'll go through the following steps:
 
-* PART 1:
+* [PART 1](#installing-official-image):
   * [Installing Official image](#installing-official-image)
   * [Cleaning up Official image](#cleaning-up-official-image) (becoming a minimal installation)
   * [Securing Official image ](#securing-official-image)(removing clunky pre-installed configs to strengthen the installation)
@@ -30,11 +30,11 @@ In this long post, I'll describe how to configure a single board computer such a
 * [PART 3](/self-hosted-nextcloud-on-sbc-complete-guide-part3):
   * [Installing + configuring MariaDB](/self-hosted-nextcloud-on-sbc-complete-guide-part3#installing-mariadb)
   * [Installing Nextcloud 20+](/self-hosted-nextcloud-on-sbc-complete-guide-part3#installing-nextcloud)
-  * [Configuring Nginx or Apache2 in front of it](/self-hosted-nextcloud-on-sbc-complete-guide-part3)
-  * [Tuning and tweaking Nextcloud 20+ freshly installed](/self-hosted-nextcloud-on-sbc-complete-guide-part3)
 * Part 4:
   * [Installing Let's Encrypt SSL wildcards certificates]()
   * [Setting up Dynhost via `ddclient`]()
+  * Installing and configuring [Nginx](/self-hosted-nextcloud-on-sbc-complete-guide-part3#installing-and-configuring-nginx) or [Apache](/self-hosted-nextcloud-on-sbc-complete-guide-part3#installing-and-configuring-apache) in front of it
+  * [Tuning and tweaking Nextcloud 20+ freshly installed](/self-hosted-nextcloud-on-sbc-complete-guide-part3#configuring-nextcloud)
 * [PART 5](/self-hosted-nextcloud-on-sbc-complete-guide-part5):
   * [Deactivating readonly root](/self-hosted-nextcloud-on-sbc-complete-guide-part5#deactivate-read-only-root)
   * [Updates despite read-only root](/self-hosted-nextcloud-on-sbc-complete-guide-part5)
