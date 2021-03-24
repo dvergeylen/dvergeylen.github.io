@@ -1,8 +1,10 @@
 ---
 layout: post
-title:  "Code snippets [Javascript]"
+series_title: "Code Snippets"
+toc_title: "Javascript (ES6+)"
+title:  "[Javascript] Useful code snippets"
 date:   2020-11-26 12:30:00 +0200
-categories: programming javascript
+tag: snippets
 permalink: /javascript-code-snippets
 ---
 

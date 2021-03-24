@@ -1,8 +1,10 @@
 ---
 layout: post
-title:  "Code snippets [Ruby]"
+series_title: "Code Snippets"
+toc_title: "Ruby (2.7.0+)"
+title:  "[Ruby] Useful code snippets"
 date:   2020-11-26 12:30:00 +0200
-categories: programming ruby
+tag: snippets
 permalink: /ruby-code-snippets
 ---
 

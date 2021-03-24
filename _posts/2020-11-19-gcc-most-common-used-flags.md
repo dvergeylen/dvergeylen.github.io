@@ -2,7 +2,7 @@
 layout: post
 title:  "Gcc most common used flags"
 date:   2020-11-19 12:30:00 +0200
-categories: programming compiler
+tag: gcc
 permalink: /gcc-most-common-used-flags
 ---
 

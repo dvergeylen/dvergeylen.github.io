@@ -1,8 +1,10 @@
 ---
 layout: post
+series_title: "Self hosted Nextcloud 20+ on a Single Board Computer: a complete guide"
+toc_title: "PART 3"
 title:  "[3/5] Self hosted Nextcloud 20+"
 date:   2021-03-23 12:30:00 +0200
-categories: nextcloud embedded linux
+tag: nextcloud
 permalink: /self-hosted-nextcloud-on-sbc-complete-guide-part3
 ---
 
