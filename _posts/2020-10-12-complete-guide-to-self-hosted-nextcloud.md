@@ -25,16 +25,16 @@ In this long post, I'll describe how to configure a single board computer such a
   * [Securing Official image ](#securing-official-image)(removing clunky pre-installed configs to strengthen the installation)
 * [PART 2](/self-hosted-nextcloud-on-sbc-complete-guide-part2):
   * [Partitioning a read-only root](/self-hosted-nextcloud-on-sbc-complete-guide-part2#read-only-root) (via `overlayroot`)
-  * [*(Optional)* installing a self-compiled kernel from kernel.org](/self-hosted-nextcloud-on-sbc-complete-guide-part2#compiling-a-vanilla-kernel-from-kernelorg-) (😎!)
+  * [***(Optional)* installing a self-compiled kernel from kernel.org**](/self-hosted-nextcloud-on-sbc-complete-guide-part2#compiling-a-vanilla-kernel-from-kernelorg-) (😎!)
   * [Strengthening the read-only](/self-hosted-nextcloud-on-sbc-complete-guide-part2#strengthening-the-read-only)
 * [PART 3](/self-hosted-nextcloud-on-sbc-complete-guide-part3):
   * [Installing + configuring MariaDB](/self-hosted-nextcloud-on-sbc-complete-guide-part3#installing-mariadb)
-  * [Installing Nextcloud 20+](/self-hosted-nextcloud-on-sbc-complete-guide-part3#installing-nextcloud)
-* Part 4:
-  * [Installing Let's Encrypt SSL wildcards certificates]()
-  * [Setting up Dynhost via `ddclient`]()
+  * [**Installing Nextcloud 20+**](/self-hosted-nextcloud-on-sbc-complete-guide-part3#installing-nextcloud)
   * Installing and configuring [Nginx](/self-hosted-nextcloud-on-sbc-complete-guide-part3#installing-and-configuring-nginx) or [Apache](/self-hosted-nextcloud-on-sbc-complete-guide-part3#installing-and-configuring-apache) in front of it
   * [Tuning and tweaking Nextcloud 20+ freshly installed](/self-hosted-nextcloud-on-sbc-complete-guide-part3#configuring-nextcloud)
+* [PART 4](/self-hosted-nextcloud-on-sbc-complete-guide-part4):
+  * [Installing Let's Encrypt SSL wildcard certificates](/self-hosted-nextcloud-on-sbc-complete-guide-part4#lets-encrypt-tls-certificate)
+  * [Dynamic host via `ddclient`](/self-hosted-nextcloud-on-sbc-complete-guide-part4#dynamic-host-via-ddclient)
 * [PART 5](/self-hosted-nextcloud-on-sbc-complete-guide-part5):
   * [Deactivating readonly root](/self-hosted-nextcloud-on-sbc-complete-guide-part5#deactivate-read-only-root)
   * [Updates despite read-only root](/self-hosted-nextcloud-on-sbc-complete-guide-part5)

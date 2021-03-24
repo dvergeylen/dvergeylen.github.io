@@ -12,7 +12,7 @@ permalink: /self-hosted-nextcloud-on-sbc-complete-guide-part2
 * [PART 1](/self-hosted-nextcloud-on-sbc-complete-guide-part1)
 * PART 2 ← You are here 🙂
 * [PART 3](/self-hosted-nextcloud-on-sbc-complete-guide-part3)
-* PART 4
+* [PART 4](/self-hosted-nextcloud-on-sbc-complete-guide-part4)
 * [PART 5](/self-hosted-nextcloud-on-sbc-complete-guide-part5)
 
 ## Read only root
