@@ -50,6 +50,45 @@ sudo reboot
     sudo reboot
   ```
 
+## Updating the Kernel
+If you recompiled your kernel in Part 2, you'll have to recompile it regularly to keep it up to date.
+
+1.  Compile kernel sources
+
+    ```bash
+    # On the HOST machine
+
+    # Assuming you still have a linux git clone from part 2
+    git branch # Will tell you on which branch you currently are
+    git pull origin linux-5.4.y
+
+    # Restart incremental compilation
+    make zImage ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j16
+    make modules ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j16
+
+    # Compile the DTS (should not be necessary)
+    make ARCH=arm rk3288-tinker.dtb CROSS_COMPILE=arm-linux-gnueabihf- -j8
+
+    # Transfer to SDCard
+    # Installing drivers on SD Card
+    sudo make ARCH=arm INSTALL_MOD_PATH=/media/$USER/324cd421-b656-4326-9882-de35a3ad335a/ modules_install
+
+    # Installing on the target's /boot partition
+    cp arch/arm/boot/zImage /media/$USER/4C89-2DED/
+    cp arch/arm/boot/dts/rk3288-miniarm.dtb /media/$USER/4C89-2DED/
+    ```
+2.  When rebooting, recreate an `initframfs`:
+
+    ```bash
+    En bootant, refaire un initrd:
+    su root
+    export PATH="/usr/sbin:$PATH"
+    update-initramfs -c -k "$(uname -r)"
+    # This will create an initrd in /boot (ex: "initrd.img-5.4.94+")
+    ```
+3.  You'll have to update the `/boot/extlinux/extlinux.conf` file with the two new files.
+
+
 ## Backuping your SD Card
 1. Put your SD Card in your host pc
 2. Umount it manually
