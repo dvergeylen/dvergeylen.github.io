@@ -89,7 +89,7 @@ If you recompiled your kernel in Part 2, you'll have to recompile it regularly t
 3.  You'll have to update the `/boot/extlinux/extlinux.conf` file with the two new files.
 
 
-## Backuping your SD Card
+## Backing up your SD Card
 1. Put your SD Card in your host pc
 2. Umount it manually
 3. Launch a terminal and type:

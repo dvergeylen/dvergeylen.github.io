@@ -497,7 +497,7 @@ apc.enable_cli = 1
 Source: [Nextcloud Doc](https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/caching_configuration.html#id1)
 
 ##### BigInt (64bit) identifiers
-Some tables primar keys are now BigInt, but Nextcloud doesn't convert them automatically as it can take hours. Follow the command line described [here](https://docs.nextcloud.com/server/latest/admin_manual/configuration_database/bigint_identifiers.html).
+Some tables primary keys are now BigInt, but Nextcloud doesn't convert them automatically as it can take hours. Follow the command line described [here](https://docs.nextcloud.com/server/latest/admin_manual/configuration_database/bigint_identifiers.html).
 
 ## Next
 TLS certificates and DNS resolution, see [PART 4](/self-hosted-nextcloud-on-sbc-complete-guide-part4)

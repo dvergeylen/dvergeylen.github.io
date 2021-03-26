@@ -123,4 +123,4 @@ you-domain-names.com,comma-separated
 If you followed until this section you should now have a pretty solid Nextcloud installation. There is of course always room for improvements and I would be thrilled to hear your suggestions! You can always contact me, there are a couple of ways to reach me out listed on the homepage. The Github repo of this blog is [open for discussions](https://github.com/dvergeylen/dvergeylen.github.io/discussions), so don't hesitate to start one there if you want to discuss about specific topics. Thanks and all the best! 🥂
 
 ## Next
-There is a 5th 'Bonus' part to this blog post serie, namely about maintenance tasks, check it out [here](/self-hosted-nextcloud-on-sbc-complete-guide-part5).
+There is a 5th 'Bonus' part to this blog post series, namely about maintenance tasks, check it out [here](/self-hosted-nextcloud-on-sbc-complete-guide-part5).
