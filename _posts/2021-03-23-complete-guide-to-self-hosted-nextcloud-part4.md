@@ -120,15 +120,16 @@ you-domain-names.com,comma-separated
 [Source [FR]](https://perhonen.fr/blog/2016/03/dynhost-dyndns-de-chez-ovh-2446)
 
 ## Solving file download interruption
-If you encounter [file download interruptions](https://github.com/nextcloud/server/issues/5390) (even for small files), the root cause might be an Ethernet and known issue of RK3399 (I've experienced that on the RK3388 as well). The solution is to deactivate TCP/UDP offloading, as described [here](https://unix.stackexchange.com/a/495378) and [here](https://github.com/MichaIng/DietPi/issues/2028).
+If you encounter [file download interruptions](https://github.com/nextcloud/server/issues/5390) (even for small files), the root cause might be an Ethernet and known issue of RK3399 (I've experienced that on the RK3388 as well).
 
-N.B: This is solved in kernels >5.7.
+#### Solution 1: disable offloading
+The easiest solution is to deactivate TCP/UDP offloading, as described [here](https://unix.stackexchange.com/a/495378) and [here](https://github.com/MichaIng/DietPi/issues/2028).
 
 ```bash
 /sbin/ethtool -K eth0 rx off tx off
 ```
 
-#### Make it permanent
+##### Make it permanent
 To make it permanent, create an if-up script `/etc/network/if-up.d/disable-offload` with the following content:
 
 ```bash
@@ -137,6 +138,26 @@ To make it permanent, create an if-up script `/etc/network/if-up.d/disable-offlo
 ```
 
 Don't forget to make it executable via `sudo chmod +x /etc/network/if-up.d/disable-offload`!
+
+#### Solution 2: patch kernel to the appropriate value
+A better solution has been proposed (and merged) in [this commit](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=8a469ee35606ba65448d54e5a2a23302f7e79e3c) for chips RK3328 and RK3399, but it also works with chip RK3288.
+
+The patch goes like this:
+
+```patch
+diff --git arch/arm/boot/dts/rk3288.dtsi arch/arm/boot/dts/rk3288.dtsi
+index cc893e154fe5..45d2850f740a 100644
+--- a/arch/arm/boot/dts/rk3288.dtsi
++++ b/arch/arm/boot/dts/rk3288.dtsi
+@@ -593,6 +593,7 @@
+                        "aclk_mac", "pclk_mac";
+                resets = <&cru SRST_MAC>;
+                reset-names = "stmmaceth";
++               snps,txpbl = <0x4>;
+                status = "disabled";
+        };
+```
+Recompile the kernel and enjoy the speed! 😎
 
 ## Conclusion
 If you followed until this section you should now have a pretty solid Nextcloud installation. There is of course always room for improvements and I would be thrilled to hear your suggestions! You can always contact me, there are a couple of ways to reach me out listed on the homepage. The Github repo of this blog is [open for discussions](https://github.com/dvergeylen/dvergeylen.github.io/discussions), so don't hesitate to start one there if you want to discuss about specific topics. Thanks and all the best! 🥂
