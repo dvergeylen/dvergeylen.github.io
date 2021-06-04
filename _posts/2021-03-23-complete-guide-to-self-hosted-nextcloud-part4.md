@@ -136,6 +136,8 @@ To make it permanent, create an if-up script `/etc/network/if-up.d/disable-offlo
 /sbin/ethtool -K eth0 rx off tx off
 ```
 
+Don't forget to make it executable via `sudo chmod +x /etc/network/if-up.d/disable-offload`!
+
 ## Conclusion
 If you followed until this section you should now have a pretty solid Nextcloud installation. There is of course always room for improvements and I would be thrilled to hear your suggestions! You can always contact me, there are a couple of ways to reach me out listed on the homepage. The Github repo of this blog is [open for discussions](https://github.com/dvergeylen/dvergeylen.github.io/discussions), so don't hesitate to start one there if you want to discuss about specific topics. Thanks and all the best! 🥂
 
