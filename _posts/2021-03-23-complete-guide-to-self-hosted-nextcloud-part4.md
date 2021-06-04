@@ -119,6 +119,23 @@ you-domain-names.com,comma-separated
 `ddclient`'s manapage gives some useful examples: `/usr/sbin/ddclient --help`
 [Source [FR]](https://perhonen.fr/blog/2016/03/dynhost-dyndns-de-chez-ovh-2446)
 
+## Solving file download interruption
+If you encounter [file download interruptions](https://github.com/nextcloud/server/issues/5390) (even for small files), the root cause might be an Ethernet and known issue of RK3399 (I've experienced that on the RK3388 as well). The solution is to deactivate TCP/UDP offloading, as described [here](https://unix.stackexchange.com/a/495378) and [here](https://github.com/MichaIng/DietPi/issues/2028).
+
+N.B: This is solved in kernels >5.7.
+
+```bash
+/sbin/ethtool -K eth0 rx off tx off
+```
+
+#### Make it permanent
+To make it permanent, create an if-up script `/etc/network/if-up.d/disable-offload` with the following content:
+
+```bash
+#!/bin/bash
+/sbin/ethtool -K eth0 rx off tx off
+```
+
 ## Conclusion
 If you followed until this section you should now have a pretty solid Nextcloud installation. There is of course always room for improvements and I would be thrilled to hear your suggestions! You can always contact me, there are a couple of ways to reach me out listed on the homepage. The Github repo of this blog is [open for discussions](https://github.com/dvergeylen/dvergeylen.github.io/discussions), so don't hesitate to start one there if you want to discuss about specific topics. Thanks and all the best! 🥂
 
