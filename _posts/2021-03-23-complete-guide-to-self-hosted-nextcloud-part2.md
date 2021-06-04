@@ -69,7 +69,8 @@ make ARCH=arm miniarm-rk3288_defconfig -j16
 # We now need to add 'overlayfs' support as a module.
 # The below command will start a terminal GUI, where you can browse the kernel config options
 make ARCH=arm menuconfig
-# overlayfs is in 'File systems' → 'Overlay Filesystem Support' and must be set to 'M'
+# overlayfs is at 'File systems' → 'Overlay Filesystem Support' and must be set to 'M'
+# hardware crypto module support is at ' Cryptographic API' → 'Hardware crypto devices' → 'Rockchip's Cryptographic Engine driver' and must be set to 'M'
 
 # Compile kernel and its modules
 make zImage ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j16
@@ -173,6 +174,21 @@ mount
 ```
 Which is indeed read-only! 😎
 
+
+## Hardware Crypto acceleration support (CONFIG_CRYPTO_DEV_ROCKCHIP)
+To enable support of the hardware crypto acceleration, one will set `CONFIG_CRYPTO_DEV_ROCKCHIP` to 'm'. The option can be found at at ' Cryptographic API' → 'Hardware crypto devices' → 'Rockchip's Cryptographic Engine driver' in `make ARCH=arm menuconfig` (forgetting `ARCH=arm` won't display the option).
+
+Ensure module loads at every boot time by editing `/etc/modules-load.d/modules.conf`:
+```bash
+# /etc/modules: kernel modules to load at boot time.
+#
+# This file contains the names of kernel modules that should be loaded
+# at boot time, one per line. Lines beginning with "#" are ignored.
+rk_crypto
+```
+
+##### Double check
+Boot your device and check via `lsmod | grep crypto` (should output `rk_crypto`). 🎉
 
 ## Next
 
