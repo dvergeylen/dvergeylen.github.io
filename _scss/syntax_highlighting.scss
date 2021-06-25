@@ -1,0 +1,97 @@
+:root {
+  // scheme: "Gruvbox dark, pale"
+  // author: "Dawid Kurek (dawikur@gmail.com), morhetz (https://github.com/morhetz/gruvbox)"
+  --base00: #262626; // ----
+  --base01: #3a3a3a; // ---
+  --base02: #4e4e4e; // --
+  --base03: #8a8a8a; // -
+  --base04: #949494; // +
+  --base05: #dab997; // ++
+  --base06: #d5c4a1; // +++
+  --base07: #ebdbb2; // ++++
+  --base08: #d75f5f; // red
+  --base09: #ff8700; // orange
+  --base0A: #ffaf00; // yellow
+  --base0B: #afaf00; // green
+  --base0C: #85ad85; // aqua/cyan
+  --base0D: #83adad; // blue
+  --base0E: #d485ad; // purple
+  --base0F: #d65d0e; // brown
+}
+
+.highlighter-rouge .highlight {
+  background-color: var(--base00);
+  color: var(--base06);
+}
+
+.highlight {
+  pre, code {
+    background-color: var(--base00);
+    color: var(--base05);
+    border: none;
+    border-radius: 0;
+  }
+  .hll { background-color: var(--base00); }
+  .c { color: var(--base03) } /* Comment */
+  .err { color: var(--base08); background-color: var(--base01) } /* Error */
+  .k { color: var(--base0E) } /* Keyword */
+  .l { color: var(--base09) } /* Literal */
+  .n { color: var(--base05) } /* Name */
+  .o { color: var(--base05) } /* Operator */
+  .p { color: var(--base08) } /* Punctuation */
+  .cm { color: var(--base03) } /* Comment.Multiline */
+  .cp { color: var(--base04) } /* Comment.Preproc */
+  .c1 { color: var(--base03) } /* Comment.Single */
+  .cs { color: var(--base03) } /* Comment.Special */
+  .ge { font-style: italic } /* Generic.Emph */
+  .gs { font-weight: bold } /* Generic.Strong */
+  .kc { color: var(--base0E) } /* Keyword.Constant */
+  .kd { color: var(--base0E) } /* Keyword.Declaration */
+  .kn { color:var(--base08) } /* Keyword.Namespace */
+  .kp { color: var(--base0E) } /* Keyword.Pseudo */
+  .kr { color: var(--base0E) } /* Keyword.Reserved */
+  .kt { color: var(--base0E) } /* Keyword.Type */
+  .ld { color: var(--base0B) } /* Literal.Date */
+  .m { color: var(--base09) } /* Literal.Number */
+  .s { color: var(--base0B) } /* Literal.String */
+  .na { color: var(--base0C) } /* Name.Attribute */
+  .nb { color: var(--base0F) } /* Name.Builtin */
+  .nc { color: var(--base0A) } /* Name.Class */
+  .no { color: var(--base0E) } /* Name.Constant */
+  .nd { color: var(--base0A) } /* Name.Decorator */
+  .ni { color: var(--base0F) } /* Name.Entity */
+  .ne { color: var(--base0A) } /* Name.Exception */
+  .nf { color: var(--base0D) } /* Name.Function */
+  .nl { color: var(--base0F) } /* Name.Label */
+  .nn { color: var(--base0F) } /* Name.Namespace */
+  .nx { color: var(--base07) } /* Name.Other */
+  .py { color: var(--base0F) } /* Name.Property */
+  .nt { color: var(--base0D) } /* Name.Tag */
+  .nv { color: var(--base0F) } /* Name.Variable */
+  .ow { color: var(--base08) } /* Operator.Word */
+  .w { color: var(--base0F) } /* Text.Whitespace */
+  .mf { color: var(--base09) } /* Literal.Number.Float */
+  .mh { color: var(--base09) } /* Literal.Number.Hex */
+  .mi { color: var(--base09) } /* Literal.Number.Integer */
+  .mo { color: var(--base09) } /* Literal.Number.Oct */
+  .sb { color: var(--base0B) } /* Literal.String.Backtick */
+  .sc { color: var(--base0B) } /* Literal.String.Char */
+  .sd { color: var(--base0B) } /* Literal.String.Doc */
+  .s2 { color: var(--base0B) } /* Literal.String.Double */
+  .se { color: var(--base09) } /* Literal.String.Escape */
+  .sh { color: var(--base0B) } /* Literal.String.Heredoc */
+  .si { color: var(--base0B) } /* Literal.String.Interpol */
+  .sx { color: var(--base0B) } /* Literal.String.Other */
+  .sr { color: var(--base0C) } /* Literal.String.Regex */
+  .s1 { color: var(--base0B) } /* Literal.String.Single */
+  .ss { color: var(--base0C) } /* Literal.String.Symbol */
+  .bp { color: var(--base0F) } /* Name.Builtin.Pseudo */
+  .vc { color: var(--base0F) } /* Name.Variable.Class */
+  .vg { color: var(--base0F) } /* Name.Variable.Global */
+  .vi { color: var(--base0F) } /* Name.Variable.Instance */
+  .il { color: var(--base09) } /* Literal.Number.Integer.Long */
+  .gh { color: var(--base04) } /* Generic Heading & Diff Header */
+  .gu { color: var(--base03); } /* Generic.Subheading & Diff Unified/Comment? */
+  .gd { color: var(--base08); } /* Generic.Deleted & Diff Deleted */
+  .gi { color: var(--base0A); } /* Generic.Inserted & Diff Inserted */
+}
