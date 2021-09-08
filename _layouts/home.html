@@ -36,7 +36,7 @@ layout: default
                 <a href="{{ post.url }}"> {{ post.toc_title | escape }}</a>
                 <span class="post-meta">
                   {%- if post.last_update -%}
-                  <strong>Updated:</strong> <i>{{ post.last_update | date: date_format }}</i>
+                  <strong>Last updated:</strong> <i>{{ post.last_update | date: date_format }}</i>
                   {% else %}
                     {{ post.date | date: date_format }}
                   {%- endif -%}
