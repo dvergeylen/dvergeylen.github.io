@@ -6,6 +6,7 @@ title:  "[2/5] Self hosted Nextcloud 20+"
 date:   2021-03-23 12:30:00 +0200
 tag: nextcloud
 permalink: /self-hosted-nextcloud-on-sbc-complete-guide-part2
+last_update: 2021-09-08 12:30:00 +0200
 ---
 
 ## See also
@@ -27,77 +28,20 @@ When rebooted, the OS will loose the data written to `tmpfs` partition and start
 #### Ensuring kernel has `overlayfs` as a module
 We'll use the `overlayroot` script from [`overlayroot`](https://packages.ubuntu.com/groovy/overlayroot) package from Ubuntu. At this time of writing, `overlayroot` [is not available in the Debian packages](https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=860915)) although its source package [cloud-initramfs-tools](https://tracker.debian.org/pkg/cloud-initramfs-tools) is still maintained.
 
-`overlayroot` needs `overlayfs` to be compiled as a module, *not* in hard in the kernel. To ensure this is the case, check the target's current kernel config ([see here](https://superuser.com/a/287372)).
+`overlayroot` needs `overlayfs` to be compiled as a module, *not* in hard in the kernel. To ensure this is the case, check `/proc/filesystems`.
 
 ```bash
-grep OVERLAY_FS /boot/config-5.10.0-4-amd64
-# [...]
-# CONFIG_OVERLAY_FS=m
-# [...]
+# Load the overlayfs module:
+sudo modprobe overlay
+
+grep overlay /proc/filesystems
+# Outputs:
+# nodev	overlay
 ```
 
 * If you see the same output as above, you can skip the next section.
-* If you see `# CONFIG_OVERLAY_FS is not set` or `CONFIG_OVERLAY_FS=y`, then it's not available at all, or not compiled as a module, respectively. You need to configure `overlayfs` properly and compile a kernel yourself.
+* If you don't see the correct output or loading the module fails, you'll have to recompile the kernel with the appropriate options, see Part 1.
 
-#### Compiling a vanilla Kernel from kernel.org 😎
-Let the fun begin!
-
-Download the kernel sources and compile them on the host machine, don't do this on the target.
-```bash
-# ON THE HOST MACHINE
-
-# Installing required compilers
-sudo apt install gcc-arm-linux-gnueabihf device-tree-compiler gcc-aarch64-linux-gnu bc
-
-# Downloading the vanilla kernel:
-git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
-cd linux
-git branch --list --remotes
-git branch --show-current
-git checkout linux-5.4.y # 5.4 is LTS until Dec, 2025
-                         # 5.10   LTS until Dec, 2022
-                         # See: https://www.kernel.org/category/releases.html
-
-# Download kernel configuration for the target board
-# Asus gives a file for Tinkerboard / TinkerBoard S / TinkerBoard 2
-curl -L https://raw.githubusercontent.com/TinkerBoard/debian_kernel/develop/arch/arm/configs/miniarm-rk3288_defconfig -o arch/arm/configs/miniarm-rk3288_defconfig
-
-# Configure the kernel sources with the downloaded configuration file
-make ARCH=arm miniarm-rk3288_defconfig -j16
-
-# (a couple of warnings might appear but they should be harmless)
-# We now need to add 'overlayfs' support as a module.
-# The below command will start a terminal GUI, where you can browse the kernel config options
-make ARCH=arm menuconfig
-# overlayfs is at 'File systems' → 'Overlay Filesystem Support' and must be set to 'M'
-# hardware crypto module support is at ' Cryptographic API' → 'Hardware crypto devices' → 'Rockchip's Cryptographic Engine driver' and must be set to 'M'
-
-# Compile kernel and its modules
-make zImage ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j16
-make modules ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j16
-
-# Tinker's dts is in mainline kernel, under the name rk3288-tinker.dts
-# (see: arm/boot/dts/rk3288-tinker.dts)
-# so compile it as well to a dtb file (binary)
-make ARCH=arm rk3288-tinker.dtb CROSS_COMPILE=arm-linux-gnueabihf- -j16
-
-# Install modules to the SDCard's '/' partition (adapt 'sdX' below)
-sudo make ARCH=arm INSTALL_MOD_PATH=/media/sdX/ modules_install
-
-# Copy freshly compiled kernel to the SDcard's '/boot' partition (adapt 'sdY' below)
-cp arch/arm/boot/zImage /media/sdY/zImage
-cp arch/arm/boot/dts/rk3288-tinker.dtb /media/sdY/rk3288-miniarm.dtb
-```
-
-##### Double check
-Boot your device with the (properly umounted from your HOST machine) SD Card and check if overlay is indeed available:
-```bash
-grep overlay /proc/filesystems
-# Outputs:
-nodev	overlay
-```
-
-🥳 Congratulations, your now have a freshly compiled kernel on your SD Card with `overlayfs` support! 🎉
 
 #### Installing and configuring `overylayroot`
 `overlayroot` is a script that automatically mounts and overlayFS `/`, mounting a `tmpfs` as updir.
@@ -135,6 +79,26 @@ mount
 ```
 
 Yeah 😎!
+
+##### Troubleshooting
+If you don't see the output above, you might be missing an initrd script. To create one, run
+
+```bash
+export PATH="/usr/sbin:$PATH"
+sudo update-initramfs -c -k "$(uname -r)"
+```
+
+This will create an initrd file in `/boot`. To tell u-boot to use it on startup, edit `/boot/extlinux/extlinux.conf` file and add a 'initrd' config line:
+
+```conf
+  label kernel-5.4.144+
+  kernel /zImage
+  fdt /rk3288-tinker.dtb
+  initrd /initrd.img-5.4.144+
+  append  earlyprintk splash console=ttyS3 console=tty1 rw init=/sbin/init
+```
+
+Replace 'initrd' suffix by your kernel version.
 
 ## Strengthening the read only
 Although overlayFS doesn't make more than necessary use of SDCard, `overlayroot` mounts it in `/media/root-ro` with default options. This includes `rw` and `relatime`, which doesn't prevent writes on the partition.
