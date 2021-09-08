@@ -79,12 +79,13 @@ sudo systemctl disable mysql.service
 sudo systemctl enable mariadb.service
 ```
 
-To access MySQL command line interface, Debian packages configures unix_socket authentication by default, meaning `root` user can log in without password (same for `$USER` via `sudo`):
+Accessing MySQL content via command line interface is done via the following command:
 
 ```bash
-sudo mysql -u root # no need of '-p' option
+sudo mysql -u root -p # password will be asked dynamically
 ```
-This means it's impossible to connect to MariaDB's cli via `mysql -u root -p` command, the password option is ignored. One can see it as a warning is logged in MariaDB's logs:
+
+It might be possible that your Debian installation configures unix_socket authentication by default, meaning `root` user can log in without password (same for `$USER` via `sudo`). This means it's impossible to connect to MariaDB's cli via `mysql -u root -p` command, the password option is ignored. One can see it as a warning is logged in MariaDB's logs:
 
 ```bash
 sudo tail /var/log/mysql/error.log
@@ -129,8 +130,6 @@ sudo apt install php7.3-bz2/stable php7.3-intl/stable php-imagick/stable php-gmp
 
 ⚠ Don't forget to configure cache in nextcloud's config ([APCU cache Doc](https://docs.nextcloud.com/server/12/admin_manual/configuration_server/caching_configuration.html#id1)), see below.
  
-⚠ Pas besoin d'installer de module `mod_webdav` car NextCloud inclus un server webdav lui-même (voir le dernier point de [cette section](https://docs.nextcloud.com/server/12/admin_manual/installation/source_installation.html#prerequisites-for-manual-installation)).
- 
 ⚠ No need to install `mod_webdav` module as Nextcloud now includes a webdav server itself (see last paragraph of [this section](https://docs.nextcloud.com/server/latest/admin_manual/installation/source_installation.html#prerequisites-for-manual-installation)).
 
 
@@ -149,24 +148,24 @@ setfacl -m u:www-data:rwx /media/data/nextcloud_tmp_dir
 
 #### Downloading latest Nextcloud archive
 There is unfortunately no official PPA for Debian, one must download a `.zip` archive from [Nextcloud homepage](https://nextcloud.com/install/#). Upgrades are done via a Nextcloud app ([Updater App](https://docs.nextcloud.com/server/latest/admin_manual/maintenance/upgrade.html)).
- 
- ```bash
- cd /tmp
- 
- # NextCloud
- curl -L https://download.nextcloud.com/server/releases/nextcloud-21.0.0.zip -o nextcloud-21.0.0.zip
- 
- # SHA256
- curl -L https://download.nextcloud.com/server/releases/nextcloud-21.0.0.zip.sha256 -o nextcloud-21.0.0.sha256
- 
- # Check download OK :
- sha256sum -c nextcloud-21.0.0.sha256 < nextcloud-21.0.0.zip
- # nextcloud-21.0.0.zip: OK
- ```
+
+```bash
+cd /tmp
+
+# NextCloud
+curl -L -O https://download.nextcloud.com/server/releases/nextcloud-21.0.4.zip
+
+# SHA256
+curl -L -O https://download.nextcloud.com/server/releases/nextcloud-21.0.4.zip.sha256
+
+# Check download OK :
+sha256sum -c nextcloud-21.0.0.sha256 < nextcloud-21.0.0.zip
+# nextcloud-21.0.0.zip: OK
+```
 
 #### Launching Nextcloud installer
 ```bash
-unzip nextcloud-21.0.0.zip
+unzip nextcloud-21.0.4.zip
 sudo mv nextcloud /var/www/
 sudo chown -R www-data:www-data /var/www/nextcloud
 sudo chmod 0770 /var/www/nextcloud
