@@ -204,7 +204,7 @@ systemctl enable serial-getty@ttyS0.service
 apt install locales
 
 apt update
-apt install git openssh-server vim firmware-linux firmware-linux-nonfree firmware-linux-free firmware-realtek firmware-iwlwifi cron acl build-essential debian-keyring initramfs-tools autoconf automake libtool sudo ufw curl lsb-release cryptsetup cryptsetup-bin
+apt install git openssh-server vim firmware-linux firmware-linux-nonfree firmware-linux-free firmware-realtek firmware-iwlwifi cron acl build-essential debian-keyring initramfs-tools autoconf automake libtool sudo ufw curl lsb-release cryptsetup cryptsetup-bin unzip curl
 
 useradd -m sheeva
 echo "sheeva:monpassword" | chpasswd
