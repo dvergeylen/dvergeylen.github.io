@@ -6,6 +6,7 @@ title:  "[3/5] Self hosted Nextcloud 20+"
 date:   2021-03-23 12:30:00 +0200
 tag: nextcloud
 permalink: /self-hosted-nextcloud-on-sbc-complete-guide-part3
+last_update: 2021-09-08 12:30:00 +0200
 ---
 
 ## See also

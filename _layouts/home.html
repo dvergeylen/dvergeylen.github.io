@@ -36,7 +36,7 @@ layout: default
                 <a href="{{ post.url }}"> {{ post.toc_title | escape }}</a>
                 <span class="post-meta">
                   {%- if post.last_update -%}
-                  <strong>Last updated:</strong> <i>{{ post.last_update | date: date_format }}</i>
+                  <strong>Last updated on:</strong> <i>{{ post.last_update | date: date_format }}</i>
                   {% else %}
                     {{ post.date | date: date_format }}
                   {%- endif -%}
@@ -53,7 +53,7 @@ layout: default
                 <span class="post-meta">
                   {{ post.date | date: date_format }}
                   {%- if post.last_update -%}
-                  <strong style="margin-left: 0.75em;">→ Last update:</strong> <i>{{ post.last_update | date: date_format }}</i>
+                  <strong style="margin-left: 0.75em;">→ Last updated on :</strong> <i>{{ post.last_update | date: date_format }}</i>
                   {%- endif -%}
                 </span>
               </h3>

@@ -9,7 +9,7 @@ permalink: /self-hosted-nextcloud-on-sbc-complete-guide-part1
 last_update: 2021-09-08 12:30:00 +0200
 ---
 
-Last update: **{{ page.last_update | date: "%B %d, %Y %H:%m" }}**
+Last updated on: **{{ page.last_update | date: "%B %d, %Y %H:%m" }}**
 
 
 <p class="info">
