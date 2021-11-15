@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>[Ruby] Useful code snippets | Daniel Vergeylen</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="[Ruby] Useful code snippets" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Introduction Here are common Ruby patterns I use all the time, mainly in Rails apps. Working on already fetched data is far more efficient than doing multiple queries, especially if the number of entries is rather “small” (to be defined, depends on your application)." />
+<meta property="og:description" content="Introduction Here are common Ruby patterns I use all the time, mainly in Rails apps. Working on already fetched data is far more efficient than doing multiple queries, especially if the number of entries is rather “small” (to be defined, depends on your application)." />
+<link rel="canonical" href="/ruby-code-snippets" />
+<meta property="og:url" content="/ruby-code-snippets" />
+<meta property="og:site_name" content="Daniel Vergeylen" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-11-26T10:30:00+00:00" />
+<script type="application/ld+json">
+{"description":"Introduction Here are common Ruby patterns I use all the time, mainly in Rails apps. Working on already fetched data is far more efficient than doing multiple queries, especially if the number of entries is rather “small” (to be defined, depends on your application).","url":"/ruby-code-snippets","@type":"BlogPosting","headline":"[Ruby] Useful code snippets","dateModified":"2020-11-26T10:30:00+00:00","datePublished":"2020-11-26T10:30:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"/ruby-code-snippets"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="/feed.xml" title="Daniel Vergeylen" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Daniel Vergeylen</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+                <a class="page-link" href="/about/">About</a>
+              </div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">[Ruby] Useful code snippets</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2020-11-26T10:30:00+00:00" itemprop="datePublished">November 26, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h4 id="introduction">Introduction</h4>
+<p>Here are common Ruby patterns I use all the time, mainly in Rails apps.
+Working on already fetched data is far more efficient than doing multiple queries, especially if the number of entries is rather “small” (to be defined, depends on your application).</p>
+
+<p>I avoid using <code class="language-plaintext highlighter-rouge">.group_by</code> as much as I can as it can be very slow, depending on what Ruby can eager load. Doing something like <code class="language-plaintext highlighter-rouge">User.last(1000).group_by(&amp;:team_id)</code> is different from <code class="language-plaintext highlighter-rouge">User.last(1000).group_by(&amp;:team)</code>, the former grouping wrt an integer, the latter with an object! The latter will be very slow as it doesn’t eager load it and you will end up with an <a href="https://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations">N+1 problem</a>.</p>
+
+<p>I have written the Javascript equivalent <a href="/javascript-code-snippets">here</a>.</p>
+
+<h3 id="code-snippets">Code Snippets</h3>
+
+<h5 id="filter">Filter</h5>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ar</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">]</span>
+<span class="n">ar</span><span class="p">.</span><span class="nf">select</span><span class="p">{</span><span class="o">|</span><span class="n">a</span><span class="o">|</span> <span class="p">(</span><span class="n">a</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">}</span>
+<span class="c1"># ↳ [2, 4, 6]</span>
+</code></pre></div></div>
+
+<h5 id="map">Map</h5>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ar</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">]</span>
+<span class="n">ar</span><span class="p">.</span><span class="nf">collect</span><span class="p">{</span><span class="o">|</span><span class="n">a</span><span class="o">|</span> <span class="n">a</span><span class="o">*</span><span class="mi">2</span><span class="p">}</span>
+<span class="c1"># ↳ [2, 4, 6, 8, 10, 12]</span>
+</code></pre></div></div>
+
+<h5 id="reduce">Reduce</h5>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Reduce starts with an initial accumulator value (here 0).</span>
+<span class="c1"># The block function is evaluated for each element of the iterator it</span>
+<span class="c1"># is called on (in order) and must return a new accumulator value.</span>
+<span class="c1"># The accumulator is an intermediate state shared among every block call.</span>
+<span class="c1"># Accumulator is returned after after last block call.</span>
+<span class="n">ar</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">]</span>
+<span class="n">ar</span><span class="p">.</span><span class="nf">reduce</span><span class="p">(</span><span class="mi">0</span><span class="p">){</span><span class="o">|</span><span class="n">acc</span><span class="p">,</span> <span class="n">a</span><span class="o">|</span> <span class="n">acc</span> <span class="o">+</span> <span class="n">a</span><span class="p">}</span>
+<span class="c1"># ↳ 21</span>
+
+<span class="c1"># Reduce is also useful with hashes...</span>
+<span class="nb">hash</span> <span class="o">=</span> <span class="p">{</span><span class="ss">a: </span><span class="s1">'b'</span><span class="p">,</span> <span class="ss">c: </span><span class="s1">'d'</span><span class="p">,</span> <span class="ss">e: </span><span class="s1">'f'</span><span class="p">}</span>
+<span class="nb">hash</span><span class="p">.</span><span class="nf">reduce</span><span class="p">({}){</span><span class="o">|</span><span class="n">acc</span><span class="p">,</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span><span class="o">|</span> <span class="n">acc</span><span class="p">.</span><span class="nf">merge</span><span class="p">({</span><span class="n">k</span> <span class="o">=&gt;</span> <span class="n">v</span><span class="p">})</span>
+<span class="c1"># ↳ {:a=&gt;"b", :c=&gt;"d", :e=&gt;"f"}</span>
+
+<span class="c1"># ... or grouping by (unknown) keys</span>
+<span class="n">ar_h</span> <span class="o">=</span> <span class="p">[{</span><span class="ss">key1: </span><span class="s1">'b'</span><span class="p">},</span> <span class="p">{</span><span class="ss">key2: </span><span class="s1">'a'</span><span class="p">},</span> <span class="p">{</span><span class="ss">key1: </span><span class="s1">'d'</span><span class="p">},</span> <span class="p">{</span><span class="ss">key2: </span><span class="s1">'c'</span><span class="p">}]</span>
+<span class="n">ar_h</span><span class="p">.</span><span class="nf">reduce</span><span class="p">({}){</span><span class="o">|</span><span class="n">acc</span><span class="p">,</span> <span class="n">elem</span><span class="o">|</span>
+  <span class="n">acc</span><span class="p">.</span><span class="nf">merge</span><span class="p">(</span><span class="n">elem</span><span class="p">.</span><span class="nf">collect</span><span class="p">{</span><span class="o">|</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="o">|</span>
+    <span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">acc</span><span class="p">[</span><span class="n">k</span><span class="p">].</span><span class="nf">nil?</span> <span class="p">?</span> <span class="n">v</span> <span class="p">:</span> <span class="n">acc</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+</span> <span class="n">v</span><span class="p">]</span>
+  <span class="p">}.</span><span class="nf">to_h</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="c1"># ↳ {:key1=&gt;"bd", :key2=&gt;"ac"}</span>
+</code></pre></div></div>
+
+<h5 id="sort">Sort</h5>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Sort takes 2 args</span>
+<span class="n">ar</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">]</span>
+<span class="n">ar</span><span class="p">.</span><span class="nf">sort</span><span class="p">{</span><span class="o">|</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="o">|</span> <span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">}</span>
+<span class="c1"># ↳ [6, 5, 4, 3, 2, 1]</span>
+
+<span class="c1"># Sort by (only takes 1 arg)</span>
+<span class="n">ar_h</span> <span class="o">=</span> <span class="p">[{</span><span class="ss">mykey: </span><span class="s1">'b'</span><span class="p">},</span> <span class="p">{</span><span class="ss">mykey: </span><span class="s1">'a'</span><span class="p">},</span> <span class="p">{</span><span class="ss">mykey: </span><span class="s1">'d'</span><span class="p">},</span> <span class="p">{</span><span class="ss">mykey: </span><span class="s1">'c'</span><span class="p">}]</span>
+<span class="n">ar_h</span><span class="p">.</span><span class="nf">sort_by</span><span class="p">{</span><span class="o">|</span><span class="n">elem</span><span class="o">|</span> <span class="n">elem</span><span class="p">[</span><span class="ss">:mykey</span><span class="p">]}</span>
+<span class="c1"># ↳ [{:mykey=&gt;"a"}, {:mykey=&gt;"b"}, {:mykey=&gt;"c"}, {:mykey=&gt;"d"}]</span>
+</code></pre></div></div>
+
+<h5 id="find">Find</h5>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ar_h</span> <span class="o">=</span> <span class="p">[{</span><span class="ss">key1: </span><span class="s1">'b'</span><span class="p">},</span> <span class="p">{</span><span class="ss">key2: </span><span class="s1">'a'</span><span class="p">},</span> <span class="p">{</span><span class="ss">key1: </span><span class="s1">'d'</span><span class="p">},</span> <span class="p">{</span><span class="ss">key2: </span><span class="s1">'c'</span><span class="p">}]</span>
+<span class="n">ar_h</span><span class="p">.</span><span class="nf">find</span><span class="p">{</span><span class="o">|</span><span class="n">elem</span><span class="o">|</span> <span class="n">elem</span><span class="p">[</span><span class="ss">:mykey</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'d'</span><span class="p">}</span>
+<span class="c1"># ↳ {mykey: 'd'}</span>
+</code></pre></div></div>
+
+<h5 id="optional-chaining">Optional chaining</h5>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Ruby Safe navigation operator (optional chaining):</span>
+<span class="c1"># use '&amp;.' to navigate safely accross objects e.g:</span>
+<span class="vi">@contract</span><span class="o">&amp;</span><span class="p">.</span><span class="nf">user</span><span class="o">&amp;</span><span class="p">.</span><span class="nf">name</span>
+</code></pre></div></div>
+
+  </div>
+
+  <script src="https://utteranc.es/client.js"
+    repo="dvergeylen/dvergeylen.github.io"
+    issue-term="og:title"
+    label="discussion"
+    theme="github-light"
+    crossorigin="anonymous" async>
+    </script>
+
+  <a class="u-url" href="/ruby-code-snippets" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Daniel Vergeylen</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Daniel Vergeylen</li><li><a class="u-email" href="mailto:blog@sigmadelta.io">blog@sigmadelta.io</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/dvergeylen"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">dvergeylen</span></a></li><li><a href="https://www.twitter.com/dvergeylen"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">dvergeylen</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Embedded HW/SW, Linux stuff and programming. Always learning!</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Gcc most common used flags | Daniel Vergeylen</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Gcc most common used flags" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Introduction Compiling with gcc or clang from the command line can be scary at first but with a few tricks it can prove to be very useful and thrilling to use." />
+<meta property="og:description" content="Introduction Compiling with gcc or clang from the command line can be scary at first but with a few tricks it can prove to be very useful and thrilling to use." />
+<link rel="canonical" href="/gcc-most-common-used-flags" />
+<meta property="og:url" content="/gcc-most-common-used-flags" />
+<meta property="og:site_name" content="Daniel Vergeylen" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-11-19T10:30:00+00:00" />
+<script type="application/ld+json">
+{"description":"Introduction Compiling with gcc or clang from the command line can be scary at first but with a few tricks it can prove to be very useful and thrilling to use.","url":"/gcc-most-common-used-flags","@type":"BlogPosting","headline":"Gcc most common used flags","dateModified":"2020-11-19T10:30:00+00:00","datePublished":"2020-11-19T10:30:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"/gcc-most-common-used-flags"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="/feed.xml" title="Daniel Vergeylen" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Daniel Vergeylen</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+                <a class="page-link" href="/about/">About</a>
+              </div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Gcc most common used flags</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2020-11-19T10:30:00+00:00" itemprop="datePublished">November 19, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h4 id="introduction">Introduction</h4>
+<p>Compiling with <code class="language-plaintext highlighter-rouge">gcc</code> or <code class="language-plaintext highlighter-rouge">clang</code> from the command line can be scary at first but with a few tricks it can prove to be very useful and thrilling to use.</p>
+
+<p>In this blog post / reference page I’ll describe what I consider best practices, at least some tricks I use in my C/C++ projects and that saved me hours of headache.</p>
+
+<p>I’ll regularly update this post as far as I find time to cover the needed material to become confident when compiling with <code class="language-plaintext highlighter-rouge">gcc</code> / <code class="language-plaintext highlighter-rouge">clang</code>.</p>
+
+<h4 id="gcc-vs-clang-vs-">Gcc vs clang vs …?</h4>
+<p>I’ve heard this many times. Which one is better / faster / stronger? Ill-posed problem! If you are trying to oppose them against each other you are doing it wrong! 🙅</p>
+
+<p>They can both reveal sometimes better, sometimes worse. Same applies to other compilers. I’m not talking about the binaries they produce (although observing significant performance or size differences between binaries from multiple compilers can put under the spotlight some code weaknesses or at least some weirdness because that mean they all not interpret your code the same way → most probably code smell 🧦) but about the (debug) information they can provide.</p>
+
+<p>The best practice I use is that I compile my code with them <strong>both</strong> (well, not at the same time obviously). It’s particularly useful when facing compiling errors you don’t fully understand, because one can sometimes output a clearer error than the other and vice-versa. Their respective static analyzers (starting at GCC 10+) will help you find these bugs and give you why this is illegal code. That obviously doesn’t mean your code will work once compiling without warnings / errors but it’s at least a good start!</p>
+
+<p>Don’t oppose compilers between each other, embrace their differences. Having your code compiling on many of them is a very good sign your code is portable and respects standards.</p>
+
+<h3 id="most-common-gcc-flags">Most common gcc flags</h3>
+<p>You can install <code class="language-plaintext highlighter-rouge">gcc</code> man-pages via <code class="language-plaintext highlighter-rouge">sudo apt install gcc-doc</code>.</p>
+
+<p>GCC compilation flags are grouped by usage in <code class="language-plaintext highlighter-rouge">man gcc</code>. Among all the categories, the first one to consider is: <strong>Warning Options</strong>.</p>
+
+<p>It lists the flags controlling compilation warnings. There is A LOT of flags, you don’t need to know them all. Some are very specific and are only useful if you (cross-)compile to some unusual architecture or deal with some hardware which behavior can confuse the compiler if not configured properly.</p>
+
+<p>Here is a list of very useful warnings, covering most use-cases when used together:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">-Wall</code> show all warnings. It won’t activate ALL warnings as the name suggest but already a lot of them;</li>
+  <li><code class="language-plaintext highlighter-rouge">-Wextra</code> activate some extra warnings;</li>
+  <li><code class="language-plaintext highlighter-rouge">-Werror</code> treat warnings as errors. YOU WANT THIS. I always consider <em>“A warning at compile time is an error an runtime”</em>. Trust me, it will save you some time!</li>
+  <li><code class="language-plaintext highlighter-rouge">-Wfatal-errors</code> stop at first encountered error. Don’t let <code class="language-plaintext highlighter-rouge">g++</code> be <em>that</em> verbose 🙉;</li>
+  <li><code class="language-plaintext highlighter-rouge">-Wpedantic</code> Issue all the warnings demanded by strict ISO C and ISO C++; reject all programs that use forbidden extensions, and some other programs that do not follow ISO C and ISO C++.</li>
+  <li><code class="language-plaintext highlighter-rouge">-pedantic-errors</code> Give an error whenever the base standard requires a diagnostic.</li>
+</ul>
+
+<p class="warning">
+  🧐 Always consider <code>-Wpedantic</code> and <code>-pedantic-errors</code> as DEBUG flags.<br />Never put <code>-Wpedantic</code> in production code, as the outputted warnings can vary from standard to standard. Simply upgrading your compiler version can make it consider a more recent standard as the new default and some new pedantic warnings / errors might appear, preventing your code to compile. Suddenly your customer starts yelling at you as she can't compile your code anymore while nothing has changed on your side! Beware 🛡️ !
+</p>
+
+<p>Aside from the <strong>Warning Options</strong> category flags, you’ll most probably need three other ones to make your code compile in the real world: <code class="language-plaintext highlighter-rouge">-I</code>, <code class="language-plaintext highlighter-rouge">-L</code> and <code class="language-plaintext highlighter-rouge">-l</code>. These three flags tell the compiler where to look for header files (describing libraries’ APIs), libraries locations and which libraries to link against, respectively.</p>
+
+<p>As stated in <code class="language-plaintext highlighter-rouge">man gcc</code>, it makes a difference where in the command you write <code class="language-plaintext highlighter-rouge">-l</code>:</p>
+
+<blockquote>
+  <p>the linker searches and processes libraries and object files in
+the order they are specified.  Thus, foo.o -lz bar.o searches
+library z after file foo.o but before bar.o.  If bar.o refers to
+functions in z, those functions may not be loaded.</p>
+</blockquote>
+
+<p>A typical <code class="language-plaintext highlighter-rouge">gcc</code> line will be:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gcc <span class="nt">-Wall</span> <span class="nt">-Werror</span> ... <span class="nt">-Ipath</span>/to/header/files <span class="nt">-Lpath</span>/to/library/locations <span class="nt">-lmylib</span>
+</code></pre></div></div>
+
+<p>You can use <code class="language-plaintext highlighter-rouge">-I</code>, <code class="language-plaintext highlighter-rouge">-L</code> and <code class="language-plaintext highlighter-rouge">-l</code> flags multiple times.</p>
+
+<p class="warning">
+  <strong>🧐 Should I fix warnings from third-party libraries?</strong><br />
+  Compiling with <code>-Werror</code> can be cumbersome when using third party libraries. These libraries can generate some warnings and your code won't compile. Although you can post Pull Requests to fix them (if this is relevant) you might also consider life is what it is and you can't do anything about these warnings. The easiest solution is to include them as system libraries with <code>-isystem</code> instead of <code>-I</code>. GCC will know you can't do anything about the source code from these and won't bother you anymore. Neat!
+</p>
+
+<h4 id="pkg-config-to-the-rescue">pkg-config to the rescue</h4>
+<p>Knowing headers / lib files locations can be difficult when compiling on multiple platforms / OSes. <code class="language-plaintext highlighter-rouge">pkg-config</code> can help you by outputting compiler flags configured with their correct location on the local system. For instance:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Library cURL, named libcurl</span>
+pkg-config <span class="nt">--libs</span> <span class="nt">--cflags</span> libcurl
+<span class="c"># Will output:</span>
+<span class="nt">-I</span>/usr/include/x86_64-linux-gnu <span class="nt">-lcurl</span>
+</code></pre></div></div>
+
+<p>Very handy when writing a Makefile (see below)!</p>
+
+<h3 id="reference-makefile">Reference Makefile</h3>
+<p>Here is a minimal Makefile as reference. Say <code class="language-plaintext highlighter-rouge">libcurl</code> is a dependency we need to link against.</p>
+
+<p>Build your program by typing <code class="language-plaintext highlighter-rouge">make</code> in the same directory.</p>
+
+<div class="language-makefile highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">EXEC</span><span class="o">=</span>my_output
+<span class="nv">CC</span><span class="o">=</span>g++
+<span class="nv">DEBUGFLAGS</span><span class="o">=</span><span class="nt">-g</span> <span class="nt">-Wpedantic</span> <span class="nt">-pedantic-errors</span>
+<span class="nv">CPPFLAGS</span><span class="o">=</span><span class="nt">-Wall</span> <span class="nt">-Werror</span> <span class="nt">-Wextra</span> <span class="nt">-Wfatal-errors</span>
+<span class="nv">IFLAGS</span><span class="o">=</span><span class="nf">$(</span><span class="nb">shell</span> pkg-config <span class="nt">--cflags</span> libcurl<span class="nf">)</span>
+<span class="nv">LFLAGS</span><span class="o">=</span><span class="nf">$(</span><span class="nb">shell</span> pkg-config <span class="nt">--libs</span> libcurl<span class="nf">)</span>
+
+<span class="nl">all</span><span class="o">:</span> <span class="nf">$(EXEC)</span>
+
+<span class="nl">$(EXEC)</span><span class="o">:</span>
+	<span class="nv">$(CC)</span> <span class="nv">$(DEBUGFLAGS)</span> <span class="nv">$(CPPFLAGS)</span> <span class="nv">$(IFLAGS)</span> <span class="nv">$(LFLAGS)</span> main.cpp <span class="nt">-o</span> <span class="nv">$(EXEC)</span>
+
+<span class="nl">clean</span><span class="o">:</span>
+	<span class="nb">rm</span> <span class="nt">-f</span> <span class="k">*</span>.o <span class="nv">$(EXEC)</span>
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">EXEC</code> is the executable name (the final output);</li>
+  <li><code class="language-plaintext highlighter-rouge">CC</code> is the C(++) compiler you use. <code class="language-plaintext highlighter-rouge">g++</code> is part of <code class="language-plaintext highlighter-rouge">gcc</code>;</li>
+  <li><code class="language-plaintext highlighter-rouge">DEBUGFLAGS</code> are the … debug flags. <code class="language-plaintext highlighter-rouge">-g</code> makes the compiler to output symbols in the binary, allowing a debugger to run it and set breakpoints. Pedantic flags are here listed as debug flags as said above;</li>
+  <li><code class="language-plaintext highlighter-rouge">CPPFLAGS</code> are the compilation flags;
+    <ul>
+      <li>You might want to add the standard your code is written in via <code class="language-plaintext highlighter-rouge">-std=c2x</code>.</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">IFLAGS</code>: list of directories to be searched for header files during preprocessing. Contains one or multiple <code class="language-plaintext highlighter-rouge">-I</code> flags followed by relative or absolute paths.</li>
+  <li><code class="language-plaintext highlighter-rouge">LFLAGS</code>: list of libraries to link against.</li>
+</ul>
+
+  </div>
+
+  <script src="https://utteranc.es/client.js"
+    repo="dvergeylen/dvergeylen.github.io"
+    issue-term="og:title"
+    label="discussion"
+    theme="github-light"
+    crossorigin="anonymous" async>
+    </script>
+
+  <a class="u-url" href="/gcc-most-common-used-flags" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Daniel Vergeylen</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Daniel Vergeylen</li><li><a class="u-email" href="mailto:blog@sigmadelta.io">blog@sigmadelta.io</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/dvergeylen"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">dvergeylen</span></a></li><li><a href="https://www.twitter.com/dvergeylen"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">dvergeylen</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Embedded HW/SW, Linux stuff and programming. Always learning!</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>[2/5] Self hosted Nextcloud 20+ | Daniel Vergeylen</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="[2/5] Self hosted Nextcloud 20+" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="See also PART 1 PART 2 ← You are here 🙂 PART 3 PART 4 PART 5" />
+<meta property="og:description" content="See also PART 1 PART 2 ← You are here 🙂 PART 3 PART 4 PART 5" />
+<link rel="canonical" href="/self-hosted-nextcloud-on-sbc-complete-guide-part2" />
+<meta property="og:url" content="/self-hosted-nextcloud-on-sbc-complete-guide-part2" />
+<meta property="og:site_name" content="Daniel Vergeylen" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-03-23T10:30:00+00:00" />
+<script type="application/ld+json">
+{"description":"See also PART 1 PART 2 ← You are here 🙂 PART 3 PART 4 PART 5","url":"/self-hosted-nextcloud-on-sbc-complete-guide-part2","@type":"BlogPosting","headline":"[2/5] Self hosted Nextcloud 20+","dateModified":"2021-03-23T10:30:00+00:00","datePublished":"2021-03-23T10:30:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"/self-hosted-nextcloud-on-sbc-complete-guide-part2"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="/feed.xml" title="Daniel Vergeylen" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Daniel Vergeylen</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+                <a class="page-link" href="/about/">About</a>
+              </div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">[2/5] Self hosted Nextcloud 20+</h1>
+    <p class="post-meta"><span class="dt-published">Last updated on: </span><time class="dt-published" datetime="2021-03-23T10:30:00+00:00" itemprop="datePublished">September 8, 2021
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h2 id="see-also">See also</h2>
+<ul>
+  <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part1">PART 1</a></li>
+  <li>PART 2 ← You are here 🙂</li>
+  <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part3">PART 3</a></li>
+  <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part4">PART 4</a></li>
+  <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part5">PART 5</a></li>
+</ul>
+
+<h2 id="read-only-root">Read only root</h2>
+<p>A read only root partition is very useful when running a web server from a single board computer, as it will dramatically decrease the number of writes on the SDCard (which is the usual point-of-failure). Inexperienced users will usually encounter no problem installing and exposing a web server to the Internet but will most probably see serious damages on their SD Card a few months later. This is due to incoming Internet traffic (legit one but also bots, …) that will lead to spurious writes on the SDCard. Setting the root file system as read only non only prevents such writes but also avoids the necessity to track which processes are trying to write whatever information.</p>
+
+<p>“Read only” is a bit of an overstatement though, as we’ll actually set an <code class="language-plaintext highlighter-rouge">overlayfs</code>, two partitions used for the same purpose. The former to read new chunks of data (the original <code class="language-plaintext highlighter-rouge">/</code>) and the latter as a <code class="language-plaintext highlighter-rouge">tmpfs</code> filesystem where the OS will write them back.</p>
+
+<p>(→ It actually goes the other way round: the OS tries to find data from the <code class="language-plaintext highlighter-rouge">tmpfs</code> partition and if nothing is found, falls back to read the information from the overlayed (read-only) partition.</p>
+
+<p>When rebooted, the OS will loose the data written to <code class="language-plaintext highlighter-rouge">tmpfs</code> partition and start from a known state (untouched <code class="language-plaintext highlighter-rouge">/</code>).</p>
+
+<h4 id="ensuring-kernel-has-overlayfs-as-a-module">Ensuring kernel has <code class="language-plaintext highlighter-rouge">overlayfs</code> as a module</h4>
+<p>We’ll use the <code class="language-plaintext highlighter-rouge">overlayroot</code> script from <a href="https://packages.ubuntu.com/groovy/overlayroot"><code class="language-plaintext highlighter-rouge">overlayroot</code></a> package from Ubuntu. At this time of writing, <code class="language-plaintext highlighter-rouge">overlayroot</code> <a href="https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=860915">is not available in the Debian packages</a>) although its source package <a href="https://tracker.debian.org/pkg/cloud-initramfs-tools">cloud-initramfs-tools</a> is still maintained.</p>
+
+<p><code class="language-plaintext highlighter-rouge">overlayroot</code> needs <code class="language-plaintext highlighter-rouge">overlayfs</code> to be compiled as a module, <em>not</em> in hard in the kernel. To ensure this is the case, check <code class="language-plaintext highlighter-rouge">/proc/filesystems</code>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Load the overlayfs module:</span>
+<span class="nb">sudo </span>modprobe overlay
+
+<span class="nb">grep </span>overlay /proc/filesystems
+<span class="c"># Outputs:</span>
+<span class="c"># nodev	overlay</span>
+</code></pre></div></div>
+
+<ul>
+  <li>If you see the same output as above, you can skip the next section.</li>
+  <li>If you don’t see the correct output or loading the module fails, you’ll have to recompile the kernel with the appropriate options, see Part 1.</li>
+</ul>
+
+<h4 id="installing-and-configuring-overylayroot">Installing and configuring <code class="language-plaintext highlighter-rouge">overylayroot</code></h4>
+<p><code class="language-plaintext highlighter-rouge">overlayroot</code> is a script that automatically mounts and overlayFS <code class="language-plaintext highlighter-rouge">/</code>, mounting a <code class="language-plaintext highlighter-rouge">tmpfs</code> as updir.</p>
+
+<p>As said above, <code class="language-plaintext highlighter-rouge">overlayroot</code> is not directly available in Debian packages, so we download it from Ubuntu package repositories.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># ON THE TARGET MACHINE</span>
+<span class="nb">sudo </span>apt <span class="nb">install </span>cryptsetup cryptsetup-bin
+wget http://fr.archive.ubuntu.com/ubuntu/pool/main/c/cloud-initramfs-tools/overlayroot_0.47ubuntu1_all.deb
+<span class="nb">sudo </span>dpkg <span class="nt">-i</span> overlayroot_0.47ubuntu1_all.deb
+
+<span class="c"># Don't edit /etc/overlay.conf as it's part of the package</span>
+<span class="c"># Edit/Create /etc/overlayroot.local.conf instead and add the following:</span>
+<span class="nv">overlayroot</span><span class="o">=</span><span class="s2">"tmpfs:swap=1,recurse=0"</span>
+
+<span class="c"># tmpfs → updir is a tmpfs</span>
+<span class="c"># swap:1 → allows mounting swaps listed in /etc/fstab (otherwise they are left unmounted)</span>
+<span class="c"># recurse=0 → do not mount the child partitions in overlay mount.</span>
+<span class="c"># For instance, if /home is a distinct partition it won't be mounted in overlay mode (same for /boot, /media, etc)</span>
+</code></pre></div></div>
+<p>This will mount original <code class="language-plaintext highlighter-rouge">/</code> in <code class="language-plaintext highlighter-rouge">/media/root-ro</code> and a (tmpfs) updir in <code class="language-plaintext highlighter-rouge">/media/root-rw</code>, an overlay in <code class="language-plaintext highlighter-rouge">/media/root-rw/overlay</code> and a workdir un <code class="language-plaintext highlighter-rouge">/media/root-rw/overlay-workdir</code>.</p>
+
+<h5 id="rebooting">Rebooting</h5>
+<p>After reboot, inspecting <code class="language-plaintext highlighter-rouge">mount</code>’s output gives:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mount
+<span class="c"># [...]</span>
+<span class="c"># /dev/mmcblk0p2 on /media/root-ro type ext4 (rw,relatime,data=ordered)</span>
+<span class="c"># tmpfs-root on /media/root-rw type tmpfs (rw,relatime)</span>
+<span class="c"># overlayroot on / type overlay (rw,relatime,lowerdir=/media/root-ro,upperdir=/media/root-rw/overlay,workdir=/media/root-rw/overlay-workdir/_)</span>
+<span class="c"># [...]</span>
+<span class="c"># /dev/mmcblk0p1 on /boot type vfat (rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro)</span>
+</code></pre></div></div>
+
+<p>Yeah 😎!</p>
+
+<h5 id="troubleshooting">Troubleshooting</h5>
+<p>If you don’t see the output above, you might be missing an initrd script. To create one, run</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"/usr/sbin:</span><span class="nv">$PATH</span><span class="s2">"</span>
+<span class="nb">sudo </span>update-initramfs <span class="nt">-c</span> <span class="nt">-k</span> <span class="s2">"</span><span class="si">$(</span><span class="nb">uname</span> <span class="nt">-r</span><span class="si">)</span><span class="s2">"</span>
+</code></pre></div></div>
+
+<p>This will create an initrd file in <code class="language-plaintext highlighter-rouge">/boot</code>. To tell u-boot to use it on startup, edit <code class="language-plaintext highlighter-rouge">/boot/extlinux/extlinux.conf</code> file and add a ‘initrd’ config line:</p>
+
+<div class="language-conf highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="n">label</span> <span class="n">kernel</span>-<span class="m">5</span>.<span class="m">4</span>.<span class="m">144</span>+
+  <span class="n">kernel</span> /<span class="n">zImage</span>
+  <span class="n">fdt</span> /<span class="n">rk3288</span>-<span class="n">tinker</span>.<span class="n">dtb</span>
+  <span class="n">initrd</span> /<span class="n">initrd</span>.<span class="n">img</span>-<span class="m">5</span>.<span class="m">4</span>.<span class="m">144</span>+
+  <span class="n">append</span>  <span class="n">earlyprintk</span> <span class="n">splash</span> <span class="n">console</span>=<span class="n">ttyS3</span> <span class="n">console</span>=<span class="n">tty1</span> <span class="n">rw</span> <span class="n">init</span>=/<span class="n">sbin</span>/<span class="n">init</span>
+</code></pre></div></div>
+
+<p>Replace ‘initrd’ suffix by your kernel version.</p>
+
+<h2 id="strengthening-the-read-only">Strengthening the read only</h2>
+<p>Although overlayFS doesn’t make more than necessary use of SDCard, <code class="language-plaintext highlighter-rouge">overlayroot</code> mounts it in <code class="language-plaintext highlighter-rouge">/media/root-ro</code> with default options. This includes <code class="language-plaintext highlighter-rouge">rw</code> and <code class="language-plaintext highlighter-rouge">relatime</code>, which doesn’t prevent writes on the partition.</p>
+
+<p>To enforce the read-only status of the parititon, we can write a script to remount <code class="language-plaintext highlighter-rouge">/media/root-ro</code> in read only mode if appears in <code class="language-plaintext highlighter-rouge">mount</code> output.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># ⚠️ be sure to deactivate overlayroot before executing this command,</span>
+<span class="c"># otherwise your modifications will be lost after reboot!</span>
+<span class="c"># (comment /etc/overlayroot.local.conf and reboot)</span>
+
+<span class="nb">sudo </span>vim /media/root-ro/root/remount_root_ro.sh
+
+<span class="c"># Add the following content:</span>
+<span class="c">#!/usr/bin/env sh</span>
+<span class="k">if</span> <span class="o">[</span> <span class="si">$(</span>mount | <span class="nb">grep</span> <span class="nt">-c</span> <span class="s2">"/media/root-ro"</span><span class="si">)</span> <span class="nt">-gt</span> 0 <span class="o">]</span> <span class="p">;</span> <span class="k">then
+  </span>mount <span class="nt">-o</span> remount,defaults,noatime,ro <span class="nt">-t</span> ext4 /dev/mmcblk0p2 /media/root-ro
+<span class="k">fi</span>
+<span class="c"># End of file content</span>
+
+<span class="c"># Restrict the permissions to 'root' user:</span>
+<span class="nb">sudo chmod </span>744 /media/root-ro/root/remount_root_ro.sh <span class="c"># rwx r-- r--</span>
+
+<span class="c"># Install cron:</span>
+<span class="nb">sudo </span>apt <span class="nb">install </span>cron
+<span class="nb">sudo</span> <span class="nt">-u</span> root crontab <span class="nt">-e</span>
+<span class="c"># add the following line:</span>
+<span class="c"># @reboot /media/root-ro/root/remount_root_ro.sh</span>
+</code></pre></div></div>
+
+<p>After reboot, we now have:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mount
+<span class="c"># [...]</span>
+<span class="c"># /dev/mmcblk0p2 on /media/root-ro type ext4 (ro,noatime,data=ordered)</span>
+<span class="c"># [...]</span>
+</code></pre></div></div>
+<p>Which is indeed read-only! 😎</p>
+
+<h2 id="hardware-crypto-acceleration-support-config_crypto_dev_rockchip">Hardware Crypto acceleration support (CONFIG_CRYPTO_DEV_ROCKCHIP)</h2>
+<p>To enable support of the hardware crypto acceleration, one will set <code class="language-plaintext highlighter-rouge">CONFIG_CRYPTO_DEV_ROCKCHIP</code> to ‘m’. The option can be found at at ‘ Cryptographic API’ → ‘Hardware crypto devices’ → ‘Rockchip’s Cryptographic Engine driver’ in <code class="language-plaintext highlighter-rouge">make ARCH=arm menuconfig</code> (forgetting <code class="language-plaintext highlighter-rouge">ARCH=arm</code> won’t display the option).</p>
+
+<p>Ensure module loads at every boot time by editing <code class="language-plaintext highlighter-rouge">/etc/modules-load.d/modules.conf</code>:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># /etc/modules: kernel modules to load at boot time.</span>
+<span class="c">#</span>
+<span class="c"># This file contains the names of kernel modules that should be loaded</span>
+<span class="c"># at boot time, one per line. Lines beginning with "#" are ignored.</span>
+rk_crypto
+</code></pre></div></div>
+
+<h5 id="double-check">Double check</h5>
+<p>Boot your device and check via <code class="language-plaintext highlighter-rouge">lsmod | grep crypto</code> (should output <code class="language-plaintext highlighter-rouge">rk_crypto</code>). 🎉</p>
+
+<h2 id="next">Next</h2>
+
+<p>See <a href="/self-hosted-nextcloud-on-sbc-complete-guide-part3">PART 3</a></p>
+
+  </div>
+
+  <script src="https://utteranc.es/client.js"
+    repo="dvergeylen/dvergeylen.github.io"
+    issue-term="og:title"
+    label="discussion"
+    theme="github-light"
+    crossorigin="anonymous" async>
+    </script>
+
+  <a class="u-url" href="/self-hosted-nextcloud-on-sbc-complete-guide-part2" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Daniel Vergeylen</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Daniel Vergeylen</li><li><a class="u-email" href="mailto:blog@sigmadelta.io">blog@sigmadelta.io</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/dvergeylen"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">dvergeylen</span></a></li><li><a href="https://www.twitter.com/dvergeylen"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">dvergeylen</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Embedded HW/SW, Linux stuff and programming. Always learning!</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

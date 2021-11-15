@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>[3/5] Self hosted Nextcloud 20+ | Daniel Vergeylen</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="[3/5] Self hosted Nextcloud 20+" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="See also PART 1 PART 2 PART 3 ← You are here 🙂 PART 4 PART 5" />
+<meta property="og:description" content="See also PART 1 PART 2 PART 3 ← You are here 🙂 PART 4 PART 5" />
+<link rel="canonical" href="/self-hosted-nextcloud-on-sbc-complete-guide-part3" />
+<meta property="og:url" content="/self-hosted-nextcloud-on-sbc-complete-guide-part3" />
+<meta property="og:site_name" content="Daniel Vergeylen" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-03-23T10:30:00+00:00" />
+<script type="application/ld+json">
+{"description":"See also PART 1 PART 2 PART 3 ← You are here 🙂 PART 4 PART 5","url":"/self-hosted-nextcloud-on-sbc-complete-guide-part3","@type":"BlogPosting","headline":"[3/5] Self hosted Nextcloud 20+","dateModified":"2021-03-23T10:30:00+00:00","datePublished":"2021-03-23T10:30:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"/self-hosted-nextcloud-on-sbc-complete-guide-part3"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="/feed.xml" title="Daniel Vergeylen" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Daniel Vergeylen</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+                <a class="page-link" href="/about/">About</a>
+              </div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">[3/5] Self hosted Nextcloud 20+</h1>
+    <p class="post-meta"><span class="dt-published">Last updated on: </span><time class="dt-published" datetime="2021-03-23T10:30:00+00:00" itemprop="datePublished">September 8, 2021
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h2 id="see-also">See also</h2>
+<ul>
+  <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part1">PART 1</a></li>
+  <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part2">PART 2</a></li>
+  <li>PART 3 ← You are here 🙂</li>
+  <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part4">PART 4</a></li>
+  <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part5">PART 5</a></li>
+</ul>
+
+<p class="info">
+  💾 This part deals with the installation of Nextcloud itself, now that we have a minimal install + a strong filesystem to support it. Expect it to last years with minimal maintenance (mainly major releases to major releases updates) as it should be. Set it and forget it! 🏋️
+</p>
+
+<p class="warning">
+⚠️ Temporarily deactivate <code>overlayroot</code> first as we will need to write access to `/`: <a href="/self-hosted-nextcloud-on-sbc-complete-guide-part5#deactivate-read-only-root">PART 5: deactivate read only root</a>, otherwise your configuration will be lost at next reboot!
+</p>
+
+<h2 id="installing-mariadb">Installing MariaDB</h2>
+<p>We need to install MariaDB before Nextcloud as the latter will ask to which DB we want it to connect to.</p>
+
+<p>I assume we will connect and external hard drive and install MariaDB + Nextcloud on it (at least their data files). Assuming drive is mounted in <code class="language-plaintext highlighter-rouge">/media/data</code> hereafter.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo mkdir</span> /media/data
+<span class="nb">sudo chown</span> <span class="nt">-R</span> sheeva:sheeva /media/data
+<span class="nb">sudo </span>mount <span class="nt">-t</span> ext4 /dev/disk/by-uuid/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX /media/data/
+
+<span class="c"># For a permanent mount at boot time, edit /etc/fstab :</span>
+<span class="c"># UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX	/media/data/	ext4	defaults	0	2</span>
+</code></pre></div></div>
+
+<p>We can now install MariaDB, specifying that the data files will be in a specific folder in <code class="language-plaintext highlighter-rouge">/media/data</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Installing packages</span>
+<span class="nb">sudo </span>apt <span class="nb">install </span>mariadb-server mariadb-client
+
+<span class="c"># Stopping the service</span>
+<span class="nb">sudo </span>service mysql stop
+
+<span class="c"># Moving datadir directory to external hard drive</span>
+<span class="nb">mkdir</span> <span class="nt">-p</span> /media/data/mysql/datadir
+<span class="nb">sudo </span>rsync <span class="nt">-av</span> /var/lib/mysql/ /media/data/mysql/datadir <span class="c"># rsync to keep files creation dates</span>
+<span class="nb">sudo chgrp</span> <span class="nt">-R</span> mysql /media/data/mysql
+
+<span class="c"># Update datadir in config</span>
+<span class="c"># datadir = /media/data/mysql/datadir</span>
+<span class="nb">sudo </span>vim /etc/mysql/mariadb.conf.d/50-server.cnf <span class="c"># → update datadir line</span>
+
+<span class="c"># Add permissions for MariaDB to start sockets</span>
+<span class="c"># See: https://support.plesk.com/hc/en-us/articles/213918525-MySQL-does-not-start-Bind-on-unix-socket-Permission-denied</span>
+<span class="c"># at 2 places, group is 'root' instead of 'mysql'</span>
+<span class="nb">sudo chgrp </span>mysql /var/run/mysqld/
+<span class="nb">sudo chgrp </span>mysql /media/data/mysql/datadir/mysql/
+
+<span class="c"># Restart mariadb service</span>
+<span class="nb">sudo </span>service mariadb start
+
+<span class="c"># Secure installation</span>
+<span class="nb">sudo </span>mysql_secure_installation <span class="c"># will ask questions</span>
+
+<span class="c"># Move the original config file so that</span>
+<span class="c"># we are sure we are not using it anymore</span>
+<span class="nb">sudo mv</span> /var/lib/mysql /var/lib/mysql-old
+</code></pre></div></div>
+
+<p>Make sure the service is started at boot:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>systemctl is-enabled mysql.service <span class="c"># outputs enabled/disabled</span>
+<span class="nb">sudo </span>systemctl disable mysql.service
+<span class="nb">sudo </span>systemctl <span class="nb">enable </span>mariadb.service
+</code></pre></div></div>
+
+<p>Accessing MySQL content via command line interface is done via the following command:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>mysql <span class="nt">-u</span> root <span class="nt">-p</span> <span class="c"># password will be asked dynamically</span>
+</code></pre></div></div>
+
+<p>It might be possible that your Debian installation configures unix_socket authentication by default, meaning <code class="language-plaintext highlighter-rouge">root</code> user can log in without password (same for <code class="language-plaintext highlighter-rouge">$USER</code> via <code class="language-plaintext highlighter-rouge">sudo</code>). This means it’s impossible to connect to MariaDB’s cli via <code class="language-plaintext highlighter-rouge">mysql -u root -p</code> command, the password option is ignored. One can see it as a warning is logged in MariaDB’s logs:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo tail</span> /var/log/mysql/error.log
+<span class="c"># [...]</span>
+<span class="c"># 2018-10-27 18:23:31 3063459840 [Warning] 'user' entry 'root@localhost' has both a password and an authentication plugin specified. The password will be ignored.</span>
+<span class="c"># [...]</span>
+</code></pre></div></div>
+<p>Source: <a href="https://stackoverflow.com/questions/43439111/mariadb-warning-rootlocalhost-has-both-the-password-will-be-ignored#43439309">MariaDB Ubuntu root login</a></p>
+
+<p>Source: <a href="https://serverfault.com/q/872478">Relocate Datadir folder</a></p>
+
+<h2 id="installing-nextcloud">Installing Nextcloud</h2>
+
+<h4 id="creating-nextcloud-user">Creating Nextcloud user</h4>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>mysql <span class="nt">-u</span> root
+MariaDB <span class="o">[(</span>none<span class="o">)]&gt;</span> CREATE USER <span class="s1">'nextcloud_user'</span>@<span class="s1">'localhost'</span><span class="p">;</span>
+<span class="c"># Query OK, 0 rows affected (0.00 sec)</span>
+MariaDB <span class="o">[(</span>none<span class="o">)]&gt;</span> GRANT ALL PRIVILEGES ON nextcloud.<span class="k">*</span> To <span class="s1">'nextcloud_user'</span>@<span class="s1">'localhost'</span> IDENTIFIED BY <span class="s1">'$YOURPASSWORD'</span><span class="p">;</span>
+<span class="c"># Query OK, 0 rows affected (0.00 sec)</span>
+MariaDB <span class="o">[(</span>none<span class="o">)]&gt;</span> <span class="nb">exit</span>
+</code></pre></div></div>
+
+<h4 id="installing-nextcloud-required-packages">Installing Nextcloud required packages</h4>
+<p>The procedure is quiet straightforward as written in <a href="https://docs.nextcloud.com/server/17/admin_manual/installation/source_installation.html#prerequisites-label">the doc</a>.</p>
+
+<p>Needed packages:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Essentials:</span>
+<span class="nb">sudo </span>apt <span class="nb">install </span>apache2 php7.3/stable php7.3-gd/stable php7.3-xml/stable php7.3-mbstring/stable php7.3-zip/stable php7.3-curl/stable php7.3-json/stable libxml2
+
+<span class="c"># Specifics:</span>
+<span class="nb">sudo </span>apt <span class="nb">install </span>php7.3-mysql <span class="c"># MySQL / MariaDB Connector</span>
+<span class="nb">sudo </span>apt <span class="nb">install </span>php-apcu     <span class="c"># Local cache → https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/caching_configuration.html</span>
+
+<span class="c"># Higly recommended</span>
+<span class="c"># PHP module bz2 (recommended, required for extraction of apps)</span>
+<span class="c"># PHP module intl (increases language translation performance and fixes sorting of non-ASCII characters)</span>
+<span class="c"># php-imagick otherwise NextCloud security check overview complains</span>
+<span class="nb">sudo </span>apt <span class="nb">install </span>php7.3-bz2/stable php7.3-intl/stable php-imagick/stable php-gmp/stable php-bcmath/stable ssl-cert
+</code></pre></div></div>
+
+<p>⚠ Don’t forget to configure cache in nextcloud’s config (<a href="https://docs.nextcloud.com/server/12/admin_manual/configuration_server/caching_configuration.html#id1">APCU cache Doc</a>), see below.</p>
+
+<p>⚠ No need to install <code class="language-plaintext highlighter-rouge">mod_webdav</code> module as Nextcloud now includes a webdav server itself (see last paragraph of <a href="https://docs.nextcloud.com/server/latest/admin_manual/installation/source_installation.html#prerequisites-for-manual-installation">this section</a>).</p>
+
+<p>Source: <a href="https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/occ_command.html#command-line-installation-label">Nextcloud command line installation</a></p>
+
+<h4 id="creating-a-nextcloud-data-folder">Creating a Nextcloud data folder</h4>
+<p>Folder must be writable to user <code class="language-plaintext highlighter-rouge">www-data</code>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">mkdir</span> /media/data/nextcloud /media/data/nextcloud_tmp_dir
+<span class="nb">sudo chmod </span>0770 /media/data/nextcloud /media/data/nextcloud_tmp_dir
+<span class="nb">sudo </span>apt <span class="nb">install </span>acl
+setfacl <span class="nt">-m</span> u:www-data:rwx /media/data/nextcloud
+setfacl <span class="nt">-m</span> u:www-data:rwx /media/data/nextcloud_tmp_dir
+</code></pre></div></div>
+
+<h4 id="downloading-latest-nextcloud-archive">Downloading latest Nextcloud archive</h4>
+<p>There is unfortunately no official PPA for Debian, one must download a <code class="language-plaintext highlighter-rouge">.zip</code> archive from <a href="https://nextcloud.com/install/#">Nextcloud homepage</a>. Upgrades are done via a Nextcloud app (<a href="https://docs.nextcloud.com/server/latest/admin_manual/maintenance/upgrade.html">Updater App</a>).</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> /tmp
+
+<span class="c"># NextCloud</span>
+curl <span class="nt">-L</span> <span class="nt">-O</span> https://download.nextcloud.com/server/releases/nextcloud-21.0.4.zip
+
+<span class="c"># SHA256</span>
+curl <span class="nt">-L</span> <span class="nt">-O</span> https://download.nextcloud.com/server/releases/nextcloud-21.0.4.zip.sha256
+
+<span class="c"># Check download OK :</span>
+<span class="nb">sha256sum</span> <span class="nt">-c</span> nextcloud-21.0.0.sha256 &lt; nextcloud-21.0.0.zip
+<span class="c"># nextcloud-21.0.0.zip: OK</span>
+</code></pre></div></div>
+
+<h4 id="launching-nextcloud-installer">Launching Nextcloud installer</h4>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>unzip nextcloud-21.0.4.zip
+<span class="nb">sudo mv </span>nextcloud /var/www/
+<span class="nb">sudo chown</span> <span class="nt">-R</span> www-data:www-data /var/www/nextcloud
+<span class="nb">sudo chmod </span>0770 /var/www/nextcloud
+<span class="nb">sudo chmod </span>0770 /media/data/nextcloud/
+<span class="c"># See: https://docs.nextcloud.com/server/latest/admin_manual/installation/command_line_installation.html</span>
+
+<span class="c"># Launch Nextcloud install script via the following command :</span>
+<span class="c"># Adapt $DATABASE_PWD, $ADMIN_LOGIN and $ADMIN_PWD accordingly</span>
+su root
+<span class="nb">cd</span> /var/www/nextcloud
+<span class="nb">sudo</span> <span class="nt">-u</span> www-data php occ maintenance:install <span class="nt">--database</span> <span class="s2">"mysql"</span> <span class="nt">--database-name</span> <span class="s2">"nextcloud"</span> <span class="nt">--database-user</span> <span class="s2">"nextcloud_user"</span> <span class="nt">--database-pass</span> <span class="s2">"</span><span class="nv">$DATABASE_PWD</span><span class="s2">"</span> <span class="nt">--admin-user</span> <span class="s2">"</span><span class="nv">$ADMIN_LOGIN</span><span class="s2">"</span> <span class="nt">--admin-pass</span> <span class="s2">"</span><span class="nv">$ADMIN_PWD</span><span class="s2">"</span> <span class="nt">--data-dir</span> <span class="s2">"/media/data/nextcloud"</span>
+<span class="nb">exit</span>
+<span class="c"># Nextcloud was successfully installed</span>
+
+<span class="c"># If you encounter the following error:</span>
+<span class="c"># "Username is invalid because files already exist for this user"</span>
+<span class="c"># Problem is documented here: https://github.com/nextcloud/server/blob/master/lib/private/User/Manager.php#L630</span>
+<span class="c"># You unfortunately need to delete /media/data/nextcloud/ 's content, otherwise installer find some files and considers admin user already exist. There is probably a cleaner way to do this but I assume this is a fresh install. 😇</span>
+</code></pre></div></div>
+
+<p>Yeah 😎!</p>
+
+<h2 id="installing-and-configuring-nginx">Installing and Configuring Nginx</h2>
+<ul>
+  <li>Keep in mind this is a starting point, you should know what you are doing. See <a href="https://docs.nextcloud.com/server/latest/admin_manual/installation/nginx.html">Nextcloud documentation</a> for more information.</li>
+  <li>Don’t forget to replace <code class="language-plaintext highlighter-rouge">$YOUR_DOMAIN_NAME</code> by your domain name in the configuration given below.</li>
+  <li>See the line <code class="language-plaintext highlighter-rouge">listen 443 ssl http2;</code>? You’ll be serving HTTP/2 requests!</li>
+  <li>This will give you an A+ score at SSL Labs. It needs a Let’s Encrypt SSL Certificate generation, covered in Part 4.</li>
+  <li>
+    <p>I’ve replaced the SSL Certificates path with <code class="language-plaintext highlighter-rouge">/path/to/XXX</code> for now.</p>
+
+    <p><img src="assets/images/nextcloud/SSLLabs_Aplus.png" alt="SSL Labs A+ Score" />
+<em>SSL Labs Test Score: A+</em></p>
+  </li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># Installing Nginx
+sudo apt install nginx php-fpm
+sudo nginx -v # gives you the installed version
+
+# Removing default website
+sudo rm /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+</code></pre></div></div>
+
+<p>Create a new config file via <code class="language-plaintext highlighter-rouge">sudo vim /etc/nginx/sites-available/nextcloud.conf</code> and paste the content below.</p>
+
+<div class="language-conf highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">upstream</span> <span class="n">php</span>-<span class="n">handler</span> {
+<span class="c">#    server 127.0.0.1:9000;
+</span>    <span class="n">server</span> <span class="n">unix</span>:/<span class="n">var</span>/<span class="n">run</span>/<span class="n">php</span>/<span class="n">php7</span>.<span class="m">3</span>-<span class="n">fpm</span>.<span class="n">sock</span>;
+}
+
+<span class="n">server</span> {
+    <span class="n">listen</span> <span class="m">80</span>;
+    <span class="n">listen</span> [::]:<span class="m">80</span>;
+    <span class="n">server_name</span> $<span class="n">YOUR_DOMAIN_NAME</span>;
+    <span class="c"># enforce https
+</span>    <span class="n">return</span> <span class="m">301</span> <span class="n">https</span>://$<span class="n">server_name</span>:<span class="m">444</span>$<span class="n">request_uri</span>;
+}
+
+<span class="n">server</span> {
+    <span class="n">listen</span> <span class="m">443</span> <span class="n">ssl</span> <span class="n">http2</span>;
+    <span class="n">listen</span> [::]:<span class="m">443</span> <span class="n">ssl</span> <span class="n">http2</span>;
+    <span class="n">server_name</span> $<span class="n">YOUR_DOMAIN_NAME</span>;
+
+    <span class="c"># TLS CONFIGURATION
+</span>    <span class="c"># We'll update this shortly (see PART 4)
+</span>    <span class="c"># ssl_certificate /path/to/fullchain.cer;
+</span>    <span class="c"># ssl_certificate_key /path/to/private_key.key;
+</span>    <span class="c"># ssl_dhparam /path/to/dhparam.pem;        # openssl dhparam -out /etc/nginx/dhparam.pem 4096
+</span>
+    <span class="n">ssl_protocols</span> <span class="n">TLSv1</span>.<span class="m">3</span> <span class="n">TLSv1</span>.<span class="m">2</span>;             <span class="c"># Requires nginx &gt;= 1.13.0 else use TLSv1.2
+</span>    <span class="n">ssl_prefer_server_ciphers</span> <span class="n">on</span>;
+    <span class="n">ssl_ciphers</span> <span class="n">EECDH</span>+<span class="n">AESGCM</span>:<span class="n">EDH</span>+<span class="n">AESGCM</span>;
+    <span class="n">ssl_ecdh_curve</span> <span class="n">secp384r1</span>;                  <span class="c"># Requires nginx &gt;= 1.1.0
+</span>    <span class="n">ssl_session_timeout</span>  <span class="m">60</span><span class="n">m</span>;
+    <span class="n">ssl_session_cache</span> <span class="n">shared</span>:<span class="n">SSL</span>:<span class="m">60</span><span class="n">m</span>;
+    <span class="n">ssl_session_tickets</span> <span class="n">off</span>;                   <span class="c"># Requires nginx &gt;= 1.5.9
+</span>    <span class="n">ssl_stapling</span> <span class="n">on</span>; <span class="c"># Requires nginx &gt;= 1.3.7
+</span>
+    <span class="n">add_header</span> <span class="n">Strict</span>-<span class="n">Transport</span>-<span class="n">Security</span> <span class="s2">"max-age=15768000; preload;"</span> <span class="n">always</span>;
+    <span class="n">add_header</span> <span class="n">Referrer</span>-<span class="n">Policy</span> <span class="s2">"no-referrer"</span> <span class="n">always</span>;
+    <span class="n">add_header</span> <span class="n">X</span>-<span class="n">Content</span>-<span class="n">Type</span>-<span class="n">Options</span> <span class="s2">"nosniff"</span> <span class="n">always</span>;
+    <span class="n">add_header</span> <span class="n">X</span>-<span class="n">Download</span>-<span class="n">Options</span> <span class="s2">"noopen"</span> <span class="n">always</span>;
+    <span class="n">add_header</span> <span class="n">X</span>-<span class="n">Frame</span>-<span class="n">Options</span> <span class="s2">"SAMEORIGIN"</span> <span class="n">always</span>;
+    <span class="n">add_header</span> <span class="n">X</span>-<span class="n">Permitted</span>-<span class="n">Cross</span>-<span class="n">Domain</span>-<span class="n">Policies</span> <span class="s2">"none"</span> <span class="n">always</span>;
+    <span class="n">add_header</span> <span class="n">X</span>-<span class="n">Robots</span>-<span class="n">Tag</span> <span class="s2">"none"</span> <span class="n">always</span>;
+    <span class="n">add_header</span> <span class="n">X</span>-<span class="n">XSS</span>-<span class="n">Protection</span> <span class="s2">"1; mode=block"</span> <span class="n">always</span>;
+
+    <span class="c"># Remove X-Powered-By, which is an information leak
+</span>    <span class="n">fastcgi_hide_header</span> <span class="n">X</span>-<span class="n">Powered</span>-<span class="n">By</span>;
+
+    <span class="c"># Path to the root of your installation
+</span>    <span class="n">root</span> /<span class="n">var</span>/<span class="n">www</span>/<span class="n">nextcloud</span>;
+
+    <span class="n">location</span> = /<span class="n">robots</span>.<span class="n">txt</span> {
+        <span class="n">allow</span> <span class="n">all</span>;
+        <span class="n">log_not_found</span> <span class="n">off</span>;
+        <span class="n">access_log</span> <span class="n">off</span>;
+    }
+
+    <span class="n">location</span> = /.<span class="n">well</span>-<span class="n">known</span>/<span class="n">carddav</span> {
+      <span class="c">#return 301 $scheme://$host:$server_port/remote.php/dav;
+</span>      <span class="n">return</span> <span class="m">301</span> $<span class="n">scheme</span>://$<span class="n">host</span>:<span class="m">444</span>/<span class="n">remote</span>.<span class="n">php</span>/<span class="n">dav</span>;
+    }
+    <span class="n">location</span> = /.<span class="n">well</span>-<span class="n">known</span>/<span class="n">caldav</span> {
+      <span class="c">#return 301 $scheme://$host:$server_port/remote.php/dav;
+</span>      <span class="n">return</span> <span class="m">301</span> $<span class="n">scheme</span>://$<span class="n">host</span>:<span class="m">444</span>/<span class="n">remote</span>.<span class="n">php</span>/<span class="n">dav</span>;
+    }
+
+    <span class="c"># set max upload size
+</span>    <span class="n">client_max_body_size</span> <span class="m">512</span><span class="n">M</span>;
+    <span class="n">fastcgi_buffers</span> <span class="m">64</span> <span class="m">4</span><span class="n">K</span>;
+
+    <span class="c"># Enable gzip but do not remove ETag headers
+</span>    <span class="n">gzip</span> <span class="n">on</span>;
+    <span class="n">gzip_vary</span> <span class="n">on</span>;
+    <span class="n">gzip_comp_level</span> <span class="m">4</span>;
+    <span class="n">gzip_min_length</span> <span class="m">256</span>;
+    <span class="n">gzip_proxied</span> <span class="n">expired</span> <span class="n">no</span>-<span class="n">cache</span> <span class="n">no</span>-<span class="n">store</span> <span class="n">private</span> <span class="n">no_last_modified</span> <span class="n">no_etag</span> <span class="n">auth</span>;
+    <span class="n">gzip_types</span> <span class="n">application</span>/<span class="n">atom</span>+<span class="n">xml</span> <span class="n">application</span>/<span class="n">javascript</span> <span class="n">application</span>/<span class="n">json</span> <span class="n">application</span>/<span class="n">ld</span>+<span class="n">json</span> <span class="n">application</span>/<span class="n">manifest</span>+<span class="n">json</span> <span class="n">application</span>/<span class="n">rss</span>+<span class="n">xml</span> <span class="n">application</span>/<span class="n">vnd</span>.<span class="n">geo</span>+<span class="n">json</span> <span class="n">application</span>/<span class="n">vnd</span>.<span class="n">ms</span>-<span class="n">fontobject</span> <span class="n">application</span>/<span class="n">x</span>-<span class="n">font</span>-<span class="n">ttf</span> <span class="n">application</span>/<span class="n">x</span>-<span class="n">web</span>-<span class="n">app</span>-<span class="n">manifest</span>+<span class="n">json</span> <span class="n">application</span>/<span class="n">xhtml</span>+<span class="n">xml</span> <span class="n">application</span>/<span class="n">xml</span> <span class="n">font</span>/<span class="n">opentype</span> <span class="n">image</span>/<span class="n">bmp</span> <span class="n">image</span>/<span class="n">svg</span>+<span class="n">xml</span> <span class="n">image</span>/<span class="n">x</span>-<span class="n">icon</span> <span class="n">text</span>/<span class="n">cache</span>-<span class="n">manifest</span> <span class="n">text</span>/<span class="n">css</span> <span class="n">text</span>/<span class="n">plain</span> <span class="n">text</span>/<span class="n">vcard</span> <span class="n">text</span>/<span class="n">vnd</span>.<span class="n">rim</span>.<span class="n">location</span>.<span class="n">xloc</span> <span class="n">text</span>/<span class="n">vtt</span> <span class="n">text</span>/<span class="n">x</span>-<span class="n">component</span> <span class="n">text</span>/<span class="n">x</span>-<span class="n">cross</span>-<span class="n">domain</span>-<span class="n">policy</span>;
+
+    <span class="c"># Uncomment if your server is build with the ngx_pagespeed module
+</span>    <span class="c"># This module is currently not supported.
+</span>    <span class="c">#pagespeed off;
+</span>
+    <span class="n">location</span> / {
+        <span class="n">rewrite</span> ^ /<span class="n">index</span>.<span class="n">php</span>;
+    }
+
+    <span class="n">location</span> ~ ^\/(?:<span class="n">build</span>|<span class="n">tests</span>|<span class="n">config</span>|<span class="n">lib</span>|<span class="m">3</span><span class="n">rdparty</span>|<span class="n">templates</span>|<span class="n">data</span>)\/ {
+        <span class="n">deny</span> <span class="n">all</span>;
+    }
+    <span class="n">location</span> ~ ^\/(?:\.|<span class="n">autotest</span>|<span class="n">occ</span>|<span class="n">issue</span>|<span class="n">indie</span>|<span class="n">db_</span>|<span class="n">console</span>) {
+        <span class="n">deny</span> <span class="n">all</span>;
+    }
+
+    <span class="n">location</span> ~ ^\/(?:<span class="n">index</span>|<span class="n">remote</span>|<span class="n">public</span>|<span class="n">cron</span>|<span class="n">core</span>\/<span class="n">ajax</span>\/<span class="n">update</span>|<span class="n">status</span>|<span class="n">ocs</span>\/<span class="n">v</span>[<span class="m">12</span>]|<span class="n">updater</span>\/.+|<span class="n">oc</span>[<span class="n">ms</span>]-<span class="n">provider</span>\/.+|.+\/<span class="n">richdocumentscode</span>\/<span class="n">proxy</span>)\.<span class="n">php</span>(?:$|\/) {
+        <span class="n">fastcgi_split_path_info</span> ^(.+?\.<span class="n">php</span>)(\/.*|)$;
+        <span class="n">set</span> $<span class="n">path_info</span> $<span class="n">fastcgi_path_info</span>;
+        <span class="n">try_files</span> $<span class="n">fastcgi_script_name</span> =<span class="m">404</span>;
+        <span class="n">include</span> <span class="n">fastcgi_params</span>;
+        <span class="n">fastcgi_param</span> <span class="n">SCRIPT_FILENAME</span> $<span class="n">document_root</span>$<span class="n">fastcgi_script_name</span>;
+        <span class="n">fastcgi_param</span> <span class="n">PATH_INFO</span> $<span class="n">path_info</span>;
+        <span class="n">fastcgi_param</span> <span class="n">HTTPS</span> <span class="n">on</span>;
+        <span class="c"># Avoid sending the security headers twice
+</span>        <span class="n">fastcgi_param</span> <span class="n">modHeadersAvailable</span> <span class="n">true</span>;
+        <span class="c"># Enable pretty urls
+</span>        <span class="n">fastcgi_param</span> <span class="n">front_controller_active</span> <span class="n">true</span>;
+        <span class="n">fastcgi_pass</span> <span class="n">php</span>-<span class="n">handler</span>;
+        <span class="n">fastcgi_intercept_errors</span> <span class="n">on</span>;
+        <span class="n">fastcgi_request_buffering</span> <span class="n">off</span>;
+    }
+
+    <span class="n">location</span> ~ ^\/(?:<span class="n">updater</span>|<span class="n">oc</span>[<span class="n">ms</span>]-<span class="n">provider</span>)(?:$|\/) {
+        <span class="n">try_files</span> $<span class="n">uri</span>/ =<span class="m">404</span>;
+        <span class="n">index</span> <span class="n">index</span>.<span class="n">php</span>;
+    }
+
+    <span class="c"># Adding the cache control header for js, css and map files
+</span>    <span class="c"># Make sure it is BELOW the PHP block
+</span>    <span class="n">location</span> ~ \.(?:<span class="n">css</span>|<span class="n">js</span>|<span class="n">woff2</span>?|<span class="n">svg</span>|<span class="n">gif</span>|<span class="n">map</span>)$ {
+        <span class="n">try_files</span> $<span class="n">uri</span> /<span class="n">index</span>.<span class="n">php</span>$<span class="n">request_uri</span>;
+        <span class="n">add_header</span> <span class="n">Cache</span>-<span class="n">Control</span> <span class="s2">"public, max-age=15778463"</span>;
+        <span class="c"># Add headers to serve security related headers (It is intended to
+</span>        <span class="c"># have those duplicated to the ones above)
+</span>        <span class="c"># Before enabling Strict-Transport-Security headers please read into
+</span>        <span class="c"># this topic first.
+</span>        <span class="c">#add_header Strict-Transport-Security "max-age=15768000; includeSubDomains; preload;" always;
+</span>        <span class="c">#
+</span>        <span class="c"># WARNING: Only add the preload option once you read about
+</span>        <span class="c"># the consequences in https://hstspreload.org/. This option
+</span>        <span class="c"># will add the domain to a hardcoded list that is shipped
+</span>        <span class="c"># in all major browsers and getting removed from this list
+</span>        <span class="c"># could take several months.
+</span>        <span class="n">add_header</span> <span class="n">Referrer</span>-<span class="n">Policy</span> <span class="s2">"no-referrer"</span> <span class="n">always</span>;
+        <span class="n">add_header</span> <span class="n">X</span>-<span class="n">Content</span>-<span class="n">Type</span>-<span class="n">Options</span> <span class="s2">"nosniff"</span> <span class="n">always</span>;
+        <span class="n">add_header</span> <span class="n">X</span>-<span class="n">Download</span>-<span class="n">Options</span> <span class="s2">"noopen"</span> <span class="n">always</span>;
+        <span class="n">add_header</span> <span class="n">X</span>-<span class="n">Frame</span>-<span class="n">Options</span> <span class="s2">"SAMEORIGIN"</span> <span class="n">always</span>;
+        <span class="n">add_header</span> <span class="n">X</span>-<span class="n">Permitted</span>-<span class="n">Cross</span>-<span class="n">Domain</span>-<span class="n">Policies</span> <span class="s2">"none"</span> <span class="n">always</span>;
+        <span class="n">add_header</span> <span class="n">X</span>-<span class="n">Robots</span>-<span class="n">Tag</span> <span class="s2">"none"</span> <span class="n">always</span>;
+        <span class="n">add_header</span> <span class="n">X</span>-<span class="n">XSS</span>-<span class="n">Protection</span> <span class="s2">"1; mode=block"</span> <span class="n">always</span>;
+
+        <span class="c"># Optional: Don't log access to assets
+</span>        <span class="n">access_log</span> <span class="n">off</span>;
+    }
+
+    <span class="n">location</span> ~ \.(?:<span class="n">png</span>|<span class="n">html</span>|<span class="n">ttf</span>|<span class="n">ico</span>|<span class="n">jpg</span>|<span class="n">jpeg</span>|<span class="n">bcmap</span>|<span class="n">mp4</span>|<span class="n">webm</span>)$ {
+        <span class="n">try_files</span> $<span class="n">uri</span> /<span class="n">index</span>.<span class="n">php</span>$<span class="n">request_uri</span>;
+        <span class="c"># Optional: Don't log access to other assets
+</span>        <span class="n">access_log</span> <span class="n">off</span>;
+    }
+}
+</code></pre></div></div>
+
+<h2 id="installing-and-configuring-apache">Installing and Configuring Apache</h2>
+<p>If you instead prefer Apache, here is the configuration required to work. More information can be found at <a href="https://docs.nextcloud.com/server/latest/admin_manual/installation/source_installation.html#apache-web-server-configuration">Nextcloud Documentation</a>.</p>
+
+<ul>
+  <li>Don’t forget to replace <code class="language-plaintext highlighter-rouge">$YOUR_DOMAIN_NAME</code> by your domain name in the configuration given below.</li>
+  <li>This will give you an A+ score at SSL Labs. It needs a Let’s Encrypt SSL Certificate generation, covered in Part 4.</li>
+  <li>I’ve replaced the SSL Certificates path with <code class="language-plaintext highlighter-rouge">/path/to/XXX</code> for now.</li>
+</ul>
+
+<p>You need to activate a few additonal modules:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>a2enmod rewrite
+<span class="nb">sudo </span>a2enmod headers
+<span class="nb">sudo </span>a2enmod <span class="nb">env</span>     <span class="c"># already enabled</span>
+<span class="nb">sudo </span>a2enmod <span class="nb">dir</span>     <span class="c"># already enabled</span>
+<span class="nb">sudo </span>a2enmod mime    <span class="c"># already enabled</span>
+<span class="nb">sudo </span>a2enmod ssl
+</code></pre></div></div>
+
+<p>Remove default configuration file and create a new one for Nextcloud:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>a2dissite 000-default.conf
+<span class="nb">sudo </span>a2dissite default-ssl.conf
+
+<span class="nb">sudo </span>vim <span class="sb">`</span>/etc/apache2/sites-available/nextcloud.conf<span class="sb">`</span>
+</code></pre></div></div>
+
+<p>Apache configuration file content:</p>
+<div class="language-conf highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">SSLUseStapling</span> <span class="n">on</span>
+<span class="n">SSLStaplingCache</span> <span class="s2">"shmcb:logs/stapling-cache(150000)"</span>
+<span class="n">ServerName</span> $<span class="n">YOUR_DOMAIN_NAME</span>
+&lt;<span class="n">VirtualHost</span> *:<span class="m">443</span>&gt;
+
+  <span class="n">Alias</span> / <span class="s2">"/var/www/nextcloud/"</span>
+
+  &lt;<span class="n">Directory</span> /<span class="n">var</span>/<span class="n">www</span>/<span class="n">nextcloud</span>/&gt;
+    <span class="n">Options</span> +<span class="n">FollowSymlinks</span>
+    <span class="n">AllowOverride</span> <span class="n">All</span>
+
+   &lt;<span class="n">IfModule</span> <span class="n">mod_dav</span>.<span class="n">c</span>&gt;
+    <span class="n">Dav</span> <span class="n">off</span>
+   &lt;/<span class="n">IfModule</span>&gt;
+
+   <span class="n">SetEnv</span> <span class="n">HOME</span> /<span class="n">var</span>/<span class="n">www</span>/<span class="n">nextcloud</span>
+   <span class="n">SetEnv</span> <span class="n">HTTP_HOME</span> /<span class="n">var</span>/<span class="n">www</span>/<span class="n">nextcloud</span>
+  &lt;/<span class="n">Directory</span>&gt;
+
+  <span class="c"># TLS CONFIGURATION
+</span>  <span class="c"># We'll update this shortly (see PART 4)
+</span>  <span class="n">SSLEngine</span> <span class="n">on</span>
+  <span class="n">SSLCertificateFile</span> /<span class="n">path</span>/<span class="n">to</span>/<span class="n">fullchain</span>.<span class="n">cer</span>
+  <span class="n">SSLCertificateKeyFile</span> /<span class="n">path</span>/<span class="n">to</span>/<span class="n">private_key</span>.<span class="n">key</span>
+  <span class="n">SSLOpenSSLConfCmd</span> <span class="n">DHParameters</span> /<span class="n">path</span>/<span class="n">to</span>/<span class="n">dhparam</span>.<span class="n">pem</span>
+
+  <span class="n">SSLCipherSuite</span> <span class="n">EECDH</span>+<span class="n">AESGCM</span>:<span class="n">EDH</span>+<span class="n">AESGCM</span>:<span class="n">AES256</span>+<span class="n">EECDH</span>:<span class="n">AES256</span>+<span class="n">EDH</span>
+  <span class="n">SSLProtocol</span> <span class="n">All</span> -<span class="n">SSLv2</span> -<span class="n">SSLv3</span> -<span class="n">TLSv1</span> -<span class="n">TLSv1</span>.<span class="m">1</span>
+  <span class="n">SSLHonorCipherOrder</span> <span class="n">On</span>
+  <span class="n">SSLCompression</span> <span class="n">off</span>
+  <span class="n">SSLSessionTickets</span> <span class="n">Off</span>
+  <span class="n">Header</span> <span class="n">always</span> <span class="n">set</span> <span class="n">Strict</span>-<span class="n">Transport</span>-<span class="n">Security</span> <span class="s2">"max-age=63072000; preload"</span>
+  <span class="c"># Not needed, set by NextCloud in /var/www/nextcloud/.htaccess file :
+</span>  <span class="c"># Header always set X-Frame-Options DENY # → Seem to be configured elsewhere
+</span>  <span class="c"># Header always set X-Content-Type-Options nosniff
+</span>&lt;/<span class="n">VirtualHost</span>&gt;
+</code></pre></div></div>
+
+<p>Enable the website:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>a2ensite nextcloud
+</code></pre></div></div>
+
+<h2 id="configuring-nextcloud">Configuring Nextcloud</h2>
+<p>At this stage you have a basic installation and a server in front of it. It’s time to fine tune Nextcloud.</p>
+
+<h4 id="fine-tuning-configphp">Fine tuning config.php</h4>
+<p>Nextcloud config file is at <code class="language-plaintext highlighter-rouge">/var/www/nextcloud/config/config.php</code>.</p>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code># I'm only listing the not default options
+<span class="cp">&lt;?php</span>
+<span class="nv">$CONFIG</span> <span class="o">=</span> <span class="k">array</span> <span class="p">(</span>
+  <span class="s1">'trusted_domains'</span> <span class="o">=&gt;</span>
+  <span class="k">array</span> <span class="p">(</span>
+    <span class="c1"># 0 =&gt; 'localhost',       # → remove this</span>
+    <span class="mi">0</span> <span class="o">=&gt;</span> <span class="s1">'192.168.1.XXX'</span><span class="p">,</span>     <span class="c1"># Target's local network address</span>
+    <span class="mi">1</span> <span class="o">=&gt;</span> <span class="s1">'$YOUR_DOMAIN_NAME'</span>  <span class="c1"># You domain name</span>
+  <span class="p">),</span>
+<span class="s1">'tempdirectory'</span> <span class="o">=&gt;</span> <span class="s1">'/media/data/nextcloud_tmp_dir'</span><span class="p">,</span> <span class="c1"># Support big files (see below)</span>
+<span class="s1">'memcache.local'</span> <span class="o">=&gt;</span> <span class="s1">'\OC\Memcache\APCu'</span><span class="p">,</span>            <span class="c1"># APCU cache support</span>
+<span class="s1">'config_is_read_only'</span> <span class="o">=&gt;</span> <span class="kc">true</span><span class="p">,</span>
+<span class="p">);</span>
+</code></pre></div></div>
+
+<h4 id="supporting-big-files">Supporting Big files</h4>
+
+<ol>
+  <li>
+    <p>Find the appropriate <code class="language-plaintext highlighter-rouge">php.ini</code> file.
+According to <a href="https://docs.nextcloud.com/server/latest/admin_manual/installation/source_installation.html#php-ini-configuration-notes">this Doc</a>, the appropriate files are different if you run Nginx or Apache, and if you are running PHP from the command line (including CRON) or from the server!</p>
+
+    <ul>
+      <li>
+        <p>Nginx: files are located here:</p>
+
+        <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/etc/php/7.3/fpm/php.ini
+/etc/php/7.3/fpm/pool.d/www.conf
+</code></pre></div>        </div>
+      </li>
+      <li>
+        <p>Apache: files are located here:</p>
+
+        <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># php.ini - used by the Web server:</span>
+/etc/php/7.3/apache2/php.ini
+<span class="c"># php.ini - used by the php-cli and so by Nextcloud CRON jobs:</span>
+/etc/php/7.3/cli/php.ini
+</code></pre></div>        </div>
+        <p>Running <code class="language-plaintext highlighter-rouge">php --ini</code> will give you which<code class="language-plaintext highlighter-rouge">php.ini</code> file is used, but this is only valid for the CLI, it might NOT be the same one used by the server!</p>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>Edit the appropriate <code class="language-plaintext highlighter-rouge">php.ini</code> file:</p>
+    <div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">upload_max_filesize</span> <span class="mi">16</span><span class="nc">G</span>
+<span class="n">post_max_size</span> <span class="mi">16</span><span class="nc">G</span>
+<span class="n">output_buffering</span> <span class="mi">0</span>
+<span class="n">memory_limit</span> <span class="mi">512</span><span class="nc">M</span>
+
+<span class="c1"># Max time before timeout (in s)</span>
+<span class="n">max_input_time</span> <span class="mi">7200</span>
+<span class="n">max_execution_time</span> <span class="mi">7200</span>
+</code></pre></div>    </div>
+    <p>Source: <a href="https://docs.nextcloud.com/server/latest/admin_manual/configuration_files/big_file_upload_configuration.html#configuring-php">Nextcloud Doc</a></p>
+  </li>
+</ol>
+
+<h4 id="enabling-apcu-cache">Enabling APCu Cache</h4>
+<p>Enable <code class="language-plaintext highlighter-rouge">apc</code> in the appropriate <code class="language-plaintext highlighter-rouge">php.ini</code> file:</p>
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">apc</span><span class="mf">.</span><span class="n">enable_cli</span> <span class="o">=</span> <span class="mi">1</span>
+</code></pre></div></div>
+<p>Source: <a href="https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/caching_configuration.html#id1">Nextcloud Doc</a></p>
+
+<h5 id="bigint-64bit-identifiers">BigInt (64bit) identifiers</h5>
+<p>Some tables primary keys are now BigInt, but Nextcloud doesn’t convert them automatically as it can take hours. Follow the command line described <a href="https://docs.nextcloud.com/server/latest/admin_manual/configuration_database/bigint_identifiers.html">here</a>.</p>
+
+<h2 id="next">Next</h2>
+<p>TLS certificates and DNS resolution, see <a href="/self-hosted-nextcloud-on-sbc-complete-guide-part4">PART 4</a></p>
+
+  </div>
+
+  <script src="https://utteranc.es/client.js"
+    repo="dvergeylen/dvergeylen.github.io"
+    issue-term="og:title"
+    label="discussion"
+    theme="github-light"
+    crossorigin="anonymous" async>
+    </script>
+
+  <a class="u-url" href="/self-hosted-nextcloud-on-sbc-complete-guide-part3" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Daniel Vergeylen</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Daniel Vergeylen</li><li><a class="u-email" href="mailto:blog@sigmadelta.io">blog@sigmadelta.io</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/dvergeylen"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">dvergeylen</span></a></li><li><a href="https://www.twitter.com/dvergeylen"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">dvergeylen</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Embedded HW/SW, Linux stuff and programming. Always learning!</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

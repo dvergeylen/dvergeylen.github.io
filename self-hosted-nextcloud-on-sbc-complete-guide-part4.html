@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>[4/5] Self hosted Nextcloud 20+ | Daniel Vergeylen</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="[4/5] Self hosted Nextcloud 20+" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="See also PART 1 PART 2 PART 3 PART 4 ← You are here 🙂 PART 5" />
+<meta property="og:description" content="See also PART 1 PART 2 PART 3 PART 4 ← You are here 🙂 PART 5" />
+<link rel="canonical" href="/self-hosted-nextcloud-on-sbc-complete-guide-part4" />
+<meta property="og:url" content="/self-hosted-nextcloud-on-sbc-complete-guide-part4" />
+<meta property="og:site_name" content="Daniel Vergeylen" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-03-23T10:30:00+00:00" />
+<script type="application/ld+json">
+{"description":"See also PART 1 PART 2 PART 3 PART 4 ← You are here 🙂 PART 5","url":"/self-hosted-nextcloud-on-sbc-complete-guide-part4","@type":"BlogPosting","headline":"[4/5] Self hosted Nextcloud 20+","dateModified":"2021-03-23T10:30:00+00:00","datePublished":"2021-03-23T10:30:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"/self-hosted-nextcloud-on-sbc-complete-guide-part4"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="/feed.xml" title="Daniel Vergeylen" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Daniel Vergeylen</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+                <a class="page-link" href="/about/">About</a>
+              </div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">[4/5] Self hosted Nextcloud 20+</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2021-03-23T10:30:00+00:00" itemprop="datePublished">March 23, 2021
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h2 id="see-also">See also</h2>
+<ul>
+  <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part1">PART 1</a></li>
+  <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part2">PART 2</a></li>
+  <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part3">PART 3</a></li>
+  <li>PART 4 ← You are here 🙂</li>
+  <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part5">PART 5</a></li>
+</ul>
+
+<p class="info">
+  🎯 This part deals with TLS certificate generation (wildcard) and DNS client configuration. You are next to the end!
+</p>
+
+<h2 id="lets-encrypt-tls-certificate">Let’s Encrypt TLS Certificate</h2>
+<p>Your server serves requests à port <code class="language-plaintext highlighter-rouge">443</code>, which is reserved port for <code class="language-plaintext highlighter-rouge">https</code>. It must serve a valid TLS certificate, signed by a third party. Let’s Encrypt is a non profit issuing TLS Certificates for free, which are perfectly valid. At this time of writing, they issue &gt;1.5M certificates per day!</p>
+
+<p>They conceived an implemented a new protocoel to allow certificate issuance in an automated way. Its second version, ACMEv2, support wildcard certificate types (<code class="language-plaintext highlighter-rouge">*.mydomain.com</code>). Neat!</p>
+
+<p>Various clients appeared on the web to implement the ACME protocol. I tried a few of them but I have to say <a href="https://github.com/acmesh-official/acme.sh">acme.sh</a> is my favourite.</p>
+
+<h4 id="generate-ssltls-certificate">Generate SSL/TLS Certificate</h4>
+<p>In order to issue wildcard certificates, <code class="language-plaintext highlighter-rouge">acme.sh</code> needs to be able to write some DNS records to proove it has sufficient permissions to administer the domain name (and its subdomains). This requires an application key + secret from your DNS provider. The procedure diverges from provider to provider but <code class="language-plaintext highlighter-rouge">acme.sh</code> support <a href="https://github.com/acmesh-official/acme.sh/wiki/dnsapi">the main ones</a>, given the credentials.</p>
+
+<p>I will use OVH as an example because its the one I use and its the #1 in Europe.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Git clone du logiciel</span>
+git clone https://github.com/acmesh-official/acme.sh.git
+<span class="nb">cd </span>acme.sh
+
+<span class="c"># Get your application + secret keys from your DNS provider.</span>
+<span class="c"># I use OVH (leader in Europe), where you can fetch them here:</span>
+<span class="c"># https://eu.api.ovh.com/createApp/</span>
+
+<span class="c"># Export OVH Application Key</span>
+ <span class="nb">export </span><span class="nv">OVH_AK</span><span class="o">=</span><span class="s2">"XXX"</span>
+
+<span class="c"># Export OVH Application Secret</span>
+ <span class="nb">export </span><span class="nv">OVH_AS</span><span class="o">=</span><span class="s2">"YYY"</span>
+
+<span class="c"># Start acme.sh with the requested domain name (+ wildcard)</span>
+<span class="c"># See https://github.com/acmesh-official/acme.sh/wiki/dnsapi</span>
+<span class="c"># for per DNS provider instructions</span>
+./acme.sh <span class="nt">--issue</span> <span class="nt">-d</span> my-domain.com <span class="nt">-d</span> <span class="s1">'*.my-domain.com'</span> <span class="nt">--dns</span> dns_ovh
+
+<span class="c"># acme outputs the files location. Copy the private key path (*.key) and the fullchain path (fullcain.cer)</span>
+<span class="c"># copier les originaux vers sheeva de nextcloud</span>
+<span class="c"># /home/$USER/.acme.sh/my-domain.com/my-domain.com.key</span>
+<span class="c"># /home/$USER/.acme.sh/my-domain.com/fullchain.cer</span>
+</code></pre></div></div>
+
+<h4 id="generate-a-custom-dhparams-file">Generate a custom DHParams file</h4>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>openssl dhparam <span class="nt">-out</span> /etc/nginx/dhparam.pem 4096
+</code></pre></div></div>
+
+<h4 id="update-nginx--apache-configuration">update Nginx / Apache configuration</h4>
+<p>You can now edit the Nginx / Apache configuration from part 3 with the newly created files:</p>
+
+<ul>
+  <li>
+    <p>Nginx:</p>
+
+    <div class="language-conf highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># TLS CONFIGURATION
+</span><span class="n">ssl_certificate</span> /<span class="n">path</span>/<span class="n">to</span>/<span class="n">fullchain</span>.<span class="n">cer</span>;
+<span class="n">ssl_certificate_key</span> /<span class="n">path</span>/<span class="n">to</span>/<span class="n">private_key</span>.<span class="n">key</span>;
+<span class="n">ssl_dhparam</span> /<span class="n">path</span>/<span class="n">to</span>/<span class="n">dhparam</span>.<span class="n">pem</span>;
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Apache:</p>
+
+    <div class="language-conf highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># TLS CONFIGURATION
+</span><span class="n">SSLEngine</span> <span class="n">on</span>
+<span class="n">SSLCertificateFile</span> /<span class="n">path</span>/<span class="n">to</span>/<span class="n">fullchain</span>.<span class="n">cer</span>
+<span class="n">SSLCertificateKeyFile</span> /<span class="n">path</span>/<span class="n">to</span>/<span class="n">private_key</span>.<span class="n">key</span>
+<span class="n">SSLOpenSSLConfCmd</span> <span class="n">DHParameters</span> /<span class="n">path</span>/<span class="n">to</span>/<span class="n">dhparam</span>.<span class="n">pem</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p>Restart your server and you are good to go: <code class="language-plaintext highlighter-rouge">sudo systemctl restart nginx.service</code></p>
+
+<h2 id="dynamic-host-via-ddclient">Dynamic host via ddclient</h2>
+<p><code class="language-plaintext highlighter-rouge">ddclient</code> is a client that updates IPs for dynamic hosts and supports multiple DNS providers. It runs as a <code class="language-plaintext highlighter-rouge">systemd</code> daemon so no need for CRON stuff whatsoever!</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt <span class="nb">install </span>ddclient
+
+<span class="c"># The install script will ask questions, here are my answers for OVH DNS provider (in FR 🤷)</span>
+<span class="c">#    Fournisseur de service DNS : Other</span>
+<span class="c">#    Serveur de DNS dynamique : www.ovh.com</span>
+<span class="c">#    Protocole de mise à jour : dyndns2</span>
+<span class="c">#    Identifiant pour le service : your-ovh-identifier</span>
+<span class="c">#    Mot de passe : your password</span>
+<span class="c">#    Interface réseau utilisé par le service de DNS : eth0</span>
+<span class="c">#    Nom de domaine de DNS dynamique : your-domain-name.com</span>
+</code></pre></div></div>
+
+<p>It will already work as is, but it will use the local IP as dynamic resolution. One must update the file <code class="language-plaintext highlighter-rouge">/etc/ddclient.conf</code> as follow:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Configuration file for ddclient generated by debconf</span>
+<span class="c">#</span>
+<span class="c"># /etc/ddclient.conf</span>
+
+<span class="nv">daemon</span><span class="o">=</span>5m,                                                         <span class="se">\</span>
+<span class="nv">protocol</span><span class="o">=</span>dyndns2,                                                  <span class="se">\</span>
+<span class="nv">use</span><span class="o">=</span>web, <span class="nv">web</span><span class="o">=</span>checkip.dyndns.com/, web-skip<span class="o">=</span><span class="s1">'Current IP Address: '</span>, <span class="se">\</span>
+<span class="nv">server</span><span class="o">=</span>www.ovh.com,                                                <span class="se">\</span>
+<span class="nv">login</span><span class="o">=</span>your-ovh-identifier,                                       <span class="se">\</span>
+<span class="nv">password</span><span class="o">=</span><span class="s1">'wildcard'</span>,                                               <span class="se">\</span>
+you-domain-names.com,comma-separated
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">ddclient</code>’s manapage gives some useful examples: <code class="language-plaintext highlighter-rouge">/usr/sbin/ddclient --help</code>
+<a href="https://perhonen.fr/blog/2016/03/dynhost-dyndns-de-chez-ovh-2446">Source [FR]</a></p>
+
+<h2 id="solving-file-download-interruption">Solving file download interruption</h2>
+<p>If you encounter <a href="https://github.com/nextcloud/server/issues/5390">file download interruptions</a> (even for small files), the root cause might be an Ethernet and known issue of RK3399 (I’ve experienced that on the RK3388 as well).</p>
+
+<h4 id="solution-1-disable-offloading">Solution 1: disable offloading</h4>
+<p>The easiest solution is to deactivate TCP/UDP offloading, as described <a href="https://unix.stackexchange.com/a/495378">here</a> and <a href="https://github.com/MichaIng/DietPi/issues/2028">here</a>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/sbin/ethtool <span class="nt">-K</span> eth0 rx off tx off
+</code></pre></div></div>
+
+<h5 id="make-it-permanent">Make it permanent</h5>
+<p>To make it permanent, create an if-up script <code class="language-plaintext highlighter-rouge">/etc/network/if-up.d/disable-offload</code> with the following content:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+/sbin/ethtool <span class="nt">-K</span> eth0 rx off tx off
+</code></pre></div></div>
+
+<p>Don’t forget to make it executable via <code class="language-plaintext highlighter-rouge">sudo chmod +x /etc/network/if-up.d/disable-offload</code>!</p>
+
+<h4 id="solution-2-patch-kernel-to-the-appropriate-value">Solution 2: patch kernel to the appropriate value</h4>
+<p>A better solution has been proposed (and merged) in <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=8a469ee35606ba65448d54e5a2a23302f7e79e3c">this commit</a> for chips RK3328 and RK3399, but it also works with chip RK3288.</p>
+
+<p>The patch goes like this:</p>
+
+<div class="language-patch highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gh">diff --git arch/arm/boot/dts/rk3288.dtsi arch/arm/boot/dts/rk3288.dtsi
+index cc893e154fe5..45d2850f740a 100644
+</span><span class="gd">--- a/arch/arm/boot/dts/rk3288.dtsi
+</span><span class="gi">+++ b/arch/arm/boot/dts/rk3288.dtsi
+</span><span class="p">@@ -593,6 +593,7 @@</span>
+                        "aclk_mac", "pclk_mac";
+                resets = &lt;&amp;cru SRST_MAC&gt;;
+                reset-names = "stmmaceth";
+<span class="gi">+               snps,txpbl = &lt;0x4&gt;;
+</span>                status = "disabled";
+        };
+</code></pre></div></div>
+<p>Recompile the kernel and enjoy the speed! 😎</p>
+
+<h2 id="conclusion">Conclusion</h2>
+<p>If you followed until this section you should now have a pretty solid Nextcloud installation. There is of course always room for improvements and I would be thrilled to hear your suggestions! You can always contact me, there are a couple of ways to reach me out listed on the homepage. The Github repo of this blog is <a href="https://github.com/dvergeylen/dvergeylen.github.io/discussions">open for discussions</a>, so don’t hesitate to start one there if you want to discuss about specific topics. Thanks and all the best! 🥂</p>
+
+<h2 id="next">Next</h2>
+<p>There is a 5th ‘Bonus’ part to this blog post series, namely about maintenance tasks, check it out <a href="/self-hosted-nextcloud-on-sbc-complete-guide-part5">here</a>.</p>
+
+  </div>
+
+  <script src="https://utteranc.es/client.js"
+    repo="dvergeylen/dvergeylen.github.io"
+    issue-term="og:title"
+    label="discussion"
+    theme="github-light"
+    crossorigin="anonymous" async>
+    </script>
+
+  <a class="u-url" href="/self-hosted-nextcloud-on-sbc-complete-guide-part4" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Daniel Vergeylen</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Daniel Vergeylen</li><li><a class="u-email" href="mailto:blog@sigmadelta.io">blog@sigmadelta.io</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/dvergeylen"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">dvergeylen</span></a></li><li><a href="https://www.twitter.com/dvergeylen"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">dvergeylen</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Embedded HW/SW, Linux stuff and programming. Always learning!</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

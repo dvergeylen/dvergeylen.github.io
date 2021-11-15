@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>[C++] List of different types via unique_ptrs | Daniel Vergeylen</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="[C++] List of different types via unique_ptrs" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Introduction One of the most powerful techniques in C++ is the ability to define templated classes and structs. These abstract methods can contain “things” that the developer will specify when instantiating them (“here is a list of int, here is a list of my_struct, and so on), declinating the implementation with existing type in the code but always using the same definition as starting point every time." />
+<meta property="og:description" content="Introduction One of the most powerful techniques in C++ is the ability to define templated classes and structs. These abstract methods can contain “things” that the developer will specify when instantiating them (“here is a list of int, here is a list of my_struct, and so on), declinating the implementation with existing type in the code but always using the same definition as starting point every time." />
+<link rel="canonical" href="/c++-heterogeneous-list" />
+<meta property="og:url" content="/c++-heterogeneous-list" />
+<meta property="og:site_name" content="Daniel Vergeylen" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-04-13T10:30:00+00:00" />
+<script type="application/ld+json">
+{"description":"Introduction One of the most powerful techniques in C++ is the ability to define templated classes and structs. These abstract methods can contain “things” that the developer will specify when instantiating them (“here is a list of int, here is a list of my_struct, and so on), declinating the implementation with existing type in the code but always using the same definition as starting point every time.","url":"/c++-heterogeneous-list","@type":"BlogPosting","headline":"[C++] List of different types via unique_ptrs","dateModified":"2021-04-13T10:30:00+00:00","datePublished":"2021-04-13T10:30:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"/c++-heterogeneous-list"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="/feed.xml" title="Daniel Vergeylen" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Daniel Vergeylen</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+                <a class="page-link" href="/about/">About</a>
+              </div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">[C++] List of different types via `unique_ptr`s</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2021-04-13T10:30:00+00:00" itemprop="datePublished">April 13, 2021
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h4 id="introduction">Introduction</h4>
+<p>One of the most powerful techniques in C++ is the ability to define templated classes and structs. These abstract methods can contain “things” that the developer will specify when instantiating them (“here is a list of <code class="language-plaintext highlighter-rouge">int</code>, here is a list of <code class="language-plaintext highlighter-rouge">my_struct</code>, and so on), declinating the implementation with existing type in the code but always using the same definition as starting point every time.</p>
+
+<p>The main setback of this (already powerful) concept is that a type, once given, won’t change because it is determined at compile time. There is no way to create a list of “things” and then start adding <code class="language-plaintext highlighter-rouge">int</code>s, <code class="language-plaintext highlighter-rouge">my_struct</code>s and <code class="language-plaintext highlighter-rouge">my_other_struct</code>s elements at the same time. This would definitely make the compiler very angry.</p>
+
+<p>There is nevertheless a very subtle trick when combining templating, <code class="language-plaintext highlighter-rouge">unique_ptr</code> and class inheritance.</p>
+
+<h5 id="implementation">Implementation</h5>
+<p>The trick is to define a Base Class, and then define Derived Classes as needed. When creating a list, one can create a list of Base Class unique_ptr, pointing at Derived Class objects, which is legal (because they are “implicitly convertible”, see <a href="https://en.cppreference.com/w/cpp/memory/unique_ptr">here</a>).</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;iostream&gt;
+#include &lt;list&gt;
+#include &lt;memory&gt;
+</span>
+<span class="k">class</span> <span class="nc">Vehicule</span> <span class="p">{</span>
+  <span class="kt">int</span> <span class="n">length</span><span class="p">;</span>
+
+  <span class="nl">public:</span>
+  <span class="n">Vehicule</span><span class="p">(</span><span class="kt">int</span> <span class="n">length</span><span class="p">)</span> <span class="o">:</span> <span class="n">length</span><span class="p">(</span><span class="n">length</span><span class="p">)</span> <span class="p">{}</span>
+
+  <span class="c1">// Defining it as virtual forces derived class</span>
+  <span class="c1">// destructors to be called when unique_ptr goes</span>
+  <span class="c1">// out of scope.</span>
+  <span class="c1">// See: https://en.cppreference.com/w/cpp/langulength/virtual</span>
+  <span class="k">virtual</span> <span class="o">~</span><span class="n">Vehicule</span><span class="p">()</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+
+  <span class="k">virtual</span> <span class="kt">void</span> <span class="n">honk</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"This should never happen"</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="k">class</span> <span class="nc">Car</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Vehicule</span> <span class="p">{</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">color</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">boot_capacity</span><span class="p">;</span>
+
+  <span class="nl">public:</span>
+  <span class="n">Car</span><span class="p">(</span><span class="kt">int</span> <span class="n">length</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">color</span><span class="p">,</span> <span class="kt">int</span> <span class="n">boot_capacity</span><span class="p">)</span> <span class="o">:</span> <span class="n">Vehicule</span><span class="p">(</span><span class="n">length</span><span class="p">),</span>
+                                                 <span class="n">color</span><span class="p">(</span><span class="n">color</span><span class="p">),</span>
+                                                 <span class="n">boot_capacity</span><span class="p">(</span><span class="n">boot_capacity</span><span class="p">)</span> <span class="p">{}</span>
+  <span class="o">~</span><span class="n">Car</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Car Destructor Called"</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kt">void</span> <span class="n">honk</span><span class="p">()</span> <span class="k">override</span> <span class="p">{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Beep Beep!"</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="k">class</span> <span class="nc">Truck</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Vehicule</span> <span class="p">{</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">color</span><span class="p">;</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">driver</span><span class="p">;</span>
+
+  <span class="nl">public:</span>
+  <span class="n">Truck</span><span class="p">(</span><span class="kt">int</span> <span class="n">length</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">color</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">driver</span><span class="p">)</span> <span class="o">:</span> <span class="n">Vehicule</span><span class="p">(</span><span class="n">length</span><span class="p">),</span>
+                                                             <span class="n">color</span><span class="p">(</span><span class="n">color</span><span class="p">),</span>
+                                                             <span class="n">driver</span><span class="p">(</span><span class="n">driver</span><span class="p">)</span> <span class="p">{}</span>
+  <span class="o">~</span><span class="n">Truck</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Truck Destructor Called"</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kt">void</span> <span class="n">honk</span><span class="p">()</span> <span class="k">override</span> <span class="p">{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Tuut Tuut!"</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+
+  <span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Vehicule</span><span class="o">&gt;&gt;</span> <span class="n">my_list</span><span class="p">;</span>
+
+  <span class="cm">/* Here is the trick: make_unique of the Derived Class
+   * but define the unique_ptr with the Base Class */</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Vehicule</span><span class="o">&gt;</span> <span class="n">car_ptr</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="n">Car</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s">"yellow"</span><span class="p">,</span> <span class="mi">300</span><span class="p">);</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Vehicule</span><span class="o">&gt;</span> <span class="n">truck_ptr</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="n">Truck</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="s">"black"</span><span class="p">,</span> <span class="s">"John"</span><span class="p">);</span>
+
+  <span class="cm">/* Pushing them on the Base Class list is perfectly legal */</span>
+  <span class="n">my_list</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">car_ptr</span><span class="p">));</span>
+  <span class="n">my_list</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">truck_ptr</span><span class="p">));</span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="o">&amp;</span><span class="n">a</span> <span class="o">:</span> <span class="n">my_list</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">a</span><span class="o">-&gt;</span><span class="n">honk</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+
+<p>Compiling:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>g++ <span class="nt">-g</span> <span class="nt">-std</span><span class="o">=</span>c++17 <span class="nt">-Wall</span> <span class="nt">-Werror</span> <span class="nt">-Wextra</span> main.cpp
+./a.out
+<span class="c"># Outputs:</span>
+<span class="c"># Beep Beep!</span>
+<span class="c"># Tuut Tuut!</span>
+<span class="c"># Car Destructor Called</span>
+<span class="c"># Truck Destructor Called</span>
+</code></pre></div></div>
+
+  </div>
+
+  <script src="https://utteranc.es/client.js"
+    repo="dvergeylen/dvergeylen.github.io"
+    issue-term="og:title"
+    label="discussion"
+    theme="github-light"
+    crossorigin="anonymous" async>
+    </script>
+
+  <a class="u-url" href="/c++-heterogeneous-list" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Daniel Vergeylen</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Daniel Vergeylen</li><li><a class="u-email" href="mailto:blog@sigmadelta.io">blog@sigmadelta.io</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/dvergeylen"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">dvergeylen</span></a></li><li><a href="https://www.twitter.com/dvergeylen"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">dvergeylen</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Embedded HW/SW, Linux stuff and programming. Always learning!</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>[5/5] Self hosted Nextcloud 20+ | Daniel Vergeylen</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="[5/5] Self hosted Nextcloud 20+" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="See also PART 1 PART 2 PART 3 PART 4 PART 5 ← You are here 🙂" />
+<meta property="og:description" content="See also PART 1 PART 2 PART 3 PART 4 PART 5 ← You are here 🙂" />
+<link rel="canonical" href="/self-hosted-nextcloud-on-sbc-complete-guide-part5" />
+<meta property="og:url" content="/self-hosted-nextcloud-on-sbc-complete-guide-part5" />
+<meta property="og:site_name" content="Daniel Vergeylen" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-03-23T10:30:00+00:00" />
+<script type="application/ld+json">
+{"description":"See also PART 1 PART 2 PART 3 PART 4 PART 5 ← You are here 🙂","url":"/self-hosted-nextcloud-on-sbc-complete-guide-part5","@type":"BlogPosting","headline":"[5/5] Self hosted Nextcloud 20+","dateModified":"2021-03-23T10:30:00+00:00","datePublished":"2021-03-23T10:30:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"/self-hosted-nextcloud-on-sbc-complete-guide-part5"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="/feed.xml" title="Daniel Vergeylen" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Daniel Vergeylen</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+                <a class="page-link" href="/about/">About</a>
+              </div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">[5/5] Self hosted Nextcloud 20+</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2021-03-23T10:30:00+00:00" itemprop="datePublished">March 23, 2021
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h2 id="see-also">See also</h2>
+<ul>
+  <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part1">PART 1</a></li>
+  <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part2">PART 2</a></li>
+  <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part3">PART 3</a></li>
+  <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part4">PART 4</a></li>
+  <li>PART 5 ← You are here 🙂</li>
+</ul>
+
+<p class="info">
+  🏗️ This part deals with maintenance burden. Not the funniest part but always needed to ensure a healthy system. I've divided the sections as if they were 'flight rules', they aren't meant to be read sequentially.
+</p>
+
+<h2 id="remounting-as-a-readwrite-fs">Remounting as a read/write FS</h2>
+<p>When updates are needed or simply updating the configuration is needed, one could need to temporarily deactivate the read only filesystem.</p>
+
+<p>Although <code class="language-plaintext highlighter-rouge">overlayroot</code> package gives an <code class="language-plaintext highlighter-rouge">overlayroot-chroot</code> command, don’t use it for two reasons:</p>
+
+<ol>
+  <li>The <code class="language-plaintext highlighter-rouge">/media/root-ro</code> directory is remounted as <code class="language-plaintext highlighter-rouge">ro</code> and changes wouldn’t persist</li>
+  <li>Packages updates / installation might break because some operations are forbidden in chrooted environment. You might experience some <code class="language-plaintext highlighter-rouge">Running in chroot, ignoring request.</code> errors.</li>
+</ol>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>mount <span class="nt">-o</span> remount,defaults,noatime,rw <span class="nt">-t</span> ext4 /dev/mmcblk0p2 /media/root-ro
+
+<span class="nb">sudo </span>vim /media/root-ro/etc/overlayroot.local.conf
+<span class="c"># → Add '#' before `overlayroot="tmpfs:swap=1,recurse=0"` line</span>
+
+<span class="nb">sudo </span>reboot
+</code></pre></div></div>
+
+<h2 id="updating-nextcloud">Updating Nextcloud</h2>
+
+<ol>
+  <li>Remount the filesystem as read/write (see above) and reboot</li>
+  <li>Upgrade Nextcloud from the command line:
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nb">sudo</span> <span class="nt">-u</span> www-data php /var/www/nextcloud/updater/updater.phar  <span class="nt">--no-interaction</span>
+</code></pre></div>    </div>
+    <p><a href="https://docs.nextcloud.com/server/18/admin_manual/maintenance/update.html#using-the-command-line-based-updater">See Offical Doc</a></p>
+  </li>
+  <li>Remount the system in readonly mode
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nb">sudo </span>vim /etc/overlayroot.local.conf <span class="c"># uncomment the line</span>
+ <span class="nb">sudo </span>reboot
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h2 id="updating-the-kernel">Updating the Kernel</h2>
+<p>If you recompiled your kernel in Part 2, you’ll have to recompile it regularly to keep it up to date.</p>
+
+<ol>
+  <li>
+    <p>Compile kernel sources</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># On the HOST machine</span>
+
+<span class="c"># Assuming you still have a linux git clone from part 2</span>
+git branch <span class="c"># Will tell you on which branch you currently are</span>
+git pull origin linux-5.4.y
+
+<span class="c"># Restart incremental compilation</span>
+make zImage <span class="nv">ARCH</span><span class="o">=</span>arm <span class="nv">CROSS_COMPILE</span><span class="o">=</span>arm-linux-gnueabihf- <span class="nt">-j16</span>
+make modules <span class="nv">ARCH</span><span class="o">=</span>arm <span class="nv">CROSS_COMPILE</span><span class="o">=</span>arm-linux-gnueabihf- <span class="nt">-j16</span>
+
+<span class="c"># Compile the DTS (should not be necessary)</span>
+make <span class="nv">ARCH</span><span class="o">=</span>arm rk3288-tinker.dtb <span class="nv">CROSS_COMPILE</span><span class="o">=</span>arm-linux-gnueabihf- <span class="nt">-j8</span>
+
+<span class="c"># Transfer to SDCard</span>
+<span class="c"># Installing drivers on SD Card</span>
+<span class="nb">sudo </span>make <span class="nv">ARCH</span><span class="o">=</span>arm <span class="nv">INSTALL_MOD_PATH</span><span class="o">=</span>/media/<span class="nv">$USER</span>/324cd421-b656-4326-9882-de35a3ad335a/ modules_install
+
+<span class="c"># Installing on the target's /boot partition</span>
+<span class="nb">cp arch</span>/arm/boot/zImage /media/<span class="nv">$USER</span>/4C89-2DED/
+<span class="nb">cp arch</span>/arm/boot/dts/rk3288-miniarm.dtb /media/<span class="nv">$USER</span>/4C89-2DED/
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>When rebooting, recreate an <code class="language-plaintext highlighter-rouge">initframfs</code>:</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>En bootant, refaire un initrd:
+su root
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"/usr/sbin:</span><span class="nv">$PATH</span><span class="s2">"</span>
+update-initramfs <span class="nt">-c</span> <span class="nt">-k</span> <span class="s2">"</span><span class="si">$(</span><span class="nb">uname</span> <span class="nt">-r</span><span class="si">)</span><span class="s2">"</span>
+<span class="c"># This will create an initrd in /boot (ex: "initrd.img-5.4.94+")</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>You’ll have to update the <code class="language-plaintext highlighter-rouge">/boot/extlinux/extlinux.conf</code> file with the two new files.</p>
+  </li>
+</ol>
+
+<h2 id="backing-up-your-sd-card">Backing up your SD Card</h2>
+<ol>
+  <li>Put your SD Card in your host pc</li>
+  <li>Umount it manually</li>
+  <li>Launch a terminal and type:
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nb">sudo dd </span><span class="k">if</span><span class="o">=</span>/dev/mmcblk0 <span class="nv">conv</span><span class="o">=</span><span class="nb">sync</span>,noerror <span class="nv">bs</span><span class="o">=</span>64K | <span class="nb">gzip</span> <span class="nt">-c</span>  <span class="o">&gt;</span> /PATH/TO/DRIVE/backup_image.img.gz
+</code></pre></div>    </div>
+    <p>(adapt <code class="language-plaintext highlighter-rouge">mmcblk0</code> with your SD Card actual dev name)</p>
+  </li>
+</ol>
+
+<h2 id="restoring-a-backup">Restoring a backup</h2>
+<p>Same procedure but goes the other way round:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nb">gunzip  </span>backup_image.img.gz
+  <span class="nb">sudo </span>sh <span class="nt">-c</span> <span class="s1">'cat backup_image.img &gt; /dev/mmcblk0'</span>
+</code></pre></div></div>
+<p>(again, adapt <code class="language-plaintext highlighter-rouge">mmcblk0</code> with your SD Card actual dev name)</p>
+
+  </div>
+
+  <script src="https://utteranc.es/client.js"
+    repo="dvergeylen/dvergeylen.github.io"
+    issue-term="og:title"
+    label="discussion"
+    theme="github-light"
+    crossorigin="anonymous" async>
+    </script>
+
+  <a class="u-url" href="/self-hosted-nextcloud-on-sbc-complete-guide-part5" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Daniel Vergeylen</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Daniel Vergeylen</li><li><a class="u-email" href="mailto:blog@sigmadelta.io">blog@sigmadelta.io</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/dvergeylen"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">dvergeylen</span></a></li><li><a href="https://www.twitter.com/dvergeylen"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">dvergeylen</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Embedded HW/SW, Linux stuff and programming. Always learning!</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

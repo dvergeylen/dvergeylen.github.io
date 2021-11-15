@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>[1/5] Self hosted Nextcloud 20+ | Daniel Vergeylen</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="[1/5] Self hosted Nextcloud 20+" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="📚 Installation on a single board computer: a complete guide" />
+<meta property="og:description" content="📚 Installation on a single board computer: a complete guide" />
+<link rel="canonical" href="/self-hosted-nextcloud-on-sbc-complete-guide-part1" />
+<meta property="og:url" content="/self-hosted-nextcloud-on-sbc-complete-guide-part1" />
+<meta property="og:site_name" content="Daniel Vergeylen" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-10-12T10:30:00+00:00" />
+<script type="application/ld+json">
+{"description":"📚 Installation on a single board computer: a complete guide","url":"/self-hosted-nextcloud-on-sbc-complete-guide-part1","@type":"BlogPosting","headline":"[1/5] Self hosted Nextcloud 20+","dateModified":"2020-10-12T10:30:00+00:00","datePublished":"2020-10-12T10:30:00+00:00","mainEntityOfPage":{"@type":"WebPage","@id":"/self-hosted-nextcloud-on-sbc-complete-guide-part1"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="/feed.xml" title="Daniel Vergeylen" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Daniel Vergeylen</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+                <a class="page-link" href="/about/">About</a>
+              </div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">[1/5] Self hosted Nextcloud 20+</h1>
+    <p class="post-meta"><span class="dt-published">Last updated on: </span><time class="dt-published" datetime="2020-10-12T10:30:00+00:00" itemprop="datePublished">September 8, 2021
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p class="info">
+  📚 Installation on a single board computer: a complete guide
+</p>
+
+<h2 id="introduction">Introduction</h2>
+<p>In this long post, I’ll describe how to configure a single board computer such as the <strong>Raspberry Pi</strong> or the <strong>Asus Tinker Board</strong> from A to Z to support a self-hosted Nextcloud 20+ instance. We’ll go through the following steps:</p>
+
+<ul>
+  <li><a href="#installing-a-recent-image">PART 1 - Installing a recent Operating System (Debian 11 - bullseye)</a>:
+    <ul>
+      <li><a href="#installing-a-recent-image">Preliminaries</a></li>
+      <li><a href="#copying-the-bootloader">Copying the Bootloader</a></li>
+      <li><a href="#installing-a-recent-kernel-from-kernelorg">Installing a recent Kernel from kernel.org (5.4 LTS supported until December 2025)</a></li>
+      <li><a href="#installing-debian-11-bullseye">Installing Debian 11 Bullseye</a> (<code class="language-plaintext highlighter-rouge">debootstrap</code>)</li>
+    </ul>
+  </li>
+  <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part2">PART 2 - Readonly root</a>:
+    <ul>
+      <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part2#read-only-root">Partitioning a read-only root</a> (via <code class="language-plaintext highlighter-rouge">overlayroot</code>)</li>
+      <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part2#strengthening-the-read-only">Strengthening the read-only</a></li>
+    </ul>
+  </li>
+  <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part3">PART 3</a>:
+    <ul>
+      <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part3#installing-mariadb">Installing + configuring MariaDB</a></li>
+      <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part3#installing-nextcloud"><strong>Installing Nextcloud 20+</strong></a></li>
+      <li>Installing and configuring <a href="/self-hosted-nextcloud-on-sbc-complete-guide-part3#installing-and-configuring-nginx">Nginx</a> or <a href="/self-hosted-nextcloud-on-sbc-complete-guide-part3#installing-and-configuring-apache">Apache</a> in front of it</li>
+      <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part3#configuring-nextcloud">Tuning and tweaking Nextcloud 20+ freshly installed</a></li>
+    </ul>
+  </li>
+  <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part4">PART 4</a>:
+    <ul>
+      <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part4#lets-encrypt-tls-certificate">Installing Let’s Encrypt SSL wildcard certificates</a></li>
+      <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part4#dynamic-host-via-ddclient">Dynamic host via <code class="language-plaintext highlighter-rouge">ddclient</code></a></li>
+    </ul>
+  </li>
+  <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part5">PART 5</a>:
+    <ul>
+      <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part5#deactivate-read-only-root">Remounting as a read/write FS</a></li>
+      <li><a href="/self-hosted-nextcloud-on-sbc-complete-guide-part5">Updating Nextcloud</a></li>
+      <li><a href=""><strong>Backuping your SD Card</strong></a> (do that regularly while going through this guide)</li>
+    </ul>
+  </li>
+</ul>
+
+<p>My personal board is an Asus Tinker Board, but I’ve played with Raspberry Pi 4s as well before, and the procedure is roughly the same (&gt;90%). I’ll describe the differences when they arise (mainly at the image installation and cleanup steps).</p>
+
+<h2 id="installing-a-recent-image">Installing a recent image</h2>
+
+<h4 id="raspberry-pi">Raspberry pi</h4>
+<p>Download <a href="https://www.raspberrypi.org/downloads/raspberry-pi-os/">Raspberry Pi OS (32-bit) Lite</a> image.</p>
+
+<p>Unzip the file; you’ll end up with an .img file like <code class="language-plaintext highlighter-rouge">YYY-MM-DD-raspios-buster-armhf-lite.img</code>. The image is a dump of a 2Gb partition with ≃ 435Mb of content.</p>
+
+<h4 id="tinker-board">Tinker board</h4>
+<p>Download the latest image from <a href="https://www.asus.com/uk/Single-Board-Computer/Tinker-Board/HelpDesk_Download/">here</a>. The latest one for TinkerBoard 1 is the <strong>2.1.16</strong>. Starting at <strong>2.2.x</strong> you must at least have a Tinker Board S (with UMS support).</p>
+
+<p>Unzip the file; you’ll end up with an .img file like <code class="language-plaintext highlighter-rouge">Tinker_Board-Debian-Stretch-V2.1.16-20200813.img</code>. The image is a dump of a 2Gb partition with an old Kernel (4.04) and an old Debian stretch 9. We’ll update that shortly, and only keep the bootloader.</p>
+
+<h4 id="putting-the-image-on-the-sd-card">Putting the image on the SD Card</h4>
+
+<p>To transfer the <code class="language-plaintext highlighter-rouge">.img</code> content from your hard drive to the SDCard, copy its content via the <code class="language-plaintext highlighter-rouge">dd</code> command (Linux). Be aware you have to know which device name your SD card receives from the OS, <strong>your mileage may (will) vary</strong>. The best way to know is probably to <code class="language-plaintext highlighter-rouge">ls /dev</code> folder, then insert the SD Card, and <code class="language-plaintext highlighter-rouge">ls</code> it again. The newly added device is your SD Card (e.g. <code class="language-plaintext highlighter-rouge">/dev/sdb</code>). If your SD Card has multiple partitions, they will appear with a number as suffix like <code class="language-plaintext highlighter-rouge">/dev/sdb1</code>, <code class="language-plaintext highlighter-rouge">/dev/sdb2</code>, etc. We are only interested in the device name (e.g. <code class="language-plaintext highlighter-rouge">/dev/sdb</code>), <strong>not</strong> the partition name(s).</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Transfer the .img content to SD Card</span>
+<span class="nb">sudo dd </span><span class="nv">bs</span><span class="o">=</span>4M <span class="k">if</span><span class="o">=</span>Tinker_Board-Debian-Stretch-V2.1.16-20200813.img <span class="nv">of</span><span class="o">=</span>/dev/sdb <span class="nv">status</span><span class="o">=</span>progress <span class="o">&amp;&amp;</span> <span class="nb">sync</span>
+</code></pre></div></div>
+<p>⌛ This will take some time, be patient.</p>
+
+<p>Once done, starting <code class="language-plaintext highlighter-rouge">gparted</code> can be handy to extend the copied partition. SD Cards have &gt; than 16Gb by now, and the copied image is a 2Gb partition.</p>
+
+<p>If you have a raspberry pi, you are good to go and can directly jump to <a href="/self-hosted-nextcloud-on-sbc-complete-guide-part2">Part 2</a>.</p>
+
+<h2 id="copying-the-bootloader">Copying the Bootloader</h2>
+
+<h4 id="u-boot-vanilla">U-boot vanilla?</h4>
+<p>Theoretically, the TinkerBoard is officially supported by u-boot and we should compile it like this:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> /tmp
+git clone https://source.denx.de/u-boot/u-boot.git
+<span class="nb">cd </span>u-boot
+
+make <span class="nv">CROSS_COMPILE</span><span class="o">=</span>arm-linux-gnueabihf- tinker-rk3288_defconfig
+<span class="c"># If you want to see U-boot outputs, set SILENT_CONSOLE option to Yes via menuconfig</span>
+
+make <span class="nv">CROSS_COMPILE</span><span class="o">=</span>arm-linux-gnueabihf- <span class="nt">-j15</span>
+</code></pre></div></div>
+
+<p>By convention, UART2 is used by Rockchip for serial output: pin 32 for TX, 33 for RX and 30 as GND. Do not connect Vcc, prefer an external power supply.</p>
+
+<p>Transfer it on the SD card via the following command:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo dd </span><span class="k">if</span><span class="o">=</span>u-boot-rockchip.bin <span class="nv">of</span><span class="o">=</span>/dev/mmcblk0 <span class="nv">seek</span><span class="o">=</span>64
+<span class="nb">sync</span>
+</code></pre></div></div>
+
+<p>The problem is: via this technique, U-boot has never been able to find the kernel on the first partition. I can see U-boot’s output but I get a weird error. Please contact me (via the comments below) if you were able to configure the sources to make it boot nicely, I would be more than happy to have a recent u-boot on my board!</p>
+
+<h4 id="u-boot-from-asus-fork">U-boot from Asus fork?</h4>
+<p>As we can’t compile a fresh u-boot, let’s compile the sources from Asus’s fork! Located <a href="https://github.com/TinkerBoard/debian_u-boot">here</a>. I tried to compare the modifications done on the fork with the original repo but the two are too far away now and many options disappeared, changed their name, or have been added. I could find a reliable way to compare and set the same fork’s configuration on u-boot sources.</p>
+
+<p>In addition to that, <a href="https://github.com/TinkerBoard/debian_u-boot/issues/8#issuecomment-812232236">you need an old Ubuntu distribution</a> to make it compile, otherwise your build will fail.</p>
+
+<h4 id="u-boot-from-the-given-image">U-boot from the given image</h4>
+<p>Our last chance is to use the already compiled u-boot binary from the given image. We can’t recreate it but we can use it! If you copied the given image on an SD card, you have nothing to do. U-boot binary is already at sector 64.</p>
+
+<h2 id="installing-a-recent-kernel-from-kernelorg">Installing a recent Kernel from kernel.org</h2>
+<p>Let the fun begin!</p>
+
+<p>Download the kernel sources and compile them on the host machine, don’t do this on the target.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># ON THE HOST MACHINE</span>
+
+<span class="c"># Installing required compilers</span>
+<span class="nb">sudo </span>apt <span class="nb">install </span>gcc-arm-linux-gnueabihf device-tree-compiler gcc-aarch64-linux-gnu bc
+
+<span class="c"># Downloading the vanilla kernel:</span>
+git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
+<span class="nb">cd </span>linux
+git branch <span class="nt">--list</span> <span class="nt">--remotes</span>
+git branch <span class="nt">--show-current</span>
+git checkout linux-5.4.y <span class="c"># 5.4 is LTS until Dec, 2025</span>
+                         <span class="c"># 5.10   LTS doesn't boot with Asus defconfig</span>
+                         <span class="c"># See: https://www.kernel.org/category/releases.html</span>
+
+<span class="c"># Download kernel configuration for the target board</span>
+<span class="c"># Asus gives a file for Tinkerboard / TinkerBoard S / TinkerBoard 2</span>
+curl <span class="nt">-L</span> https://raw.githubusercontent.com/TinkerBoard/debian_kernel/develop/arch/arm/configs/miniarm-rk3288_defconfig <span class="nt">-o</span> <span class="nb">arch</span>/arm/configs/miniarm-rk3288_defconfig
+
+<span class="c"># Configure the kernel sources with the downloaded configuration file</span>
+make <span class="nv">ARCH</span><span class="o">=</span>arm miniarm-rk3288_defconfig <span class="nt">-j16</span>
+
+<span class="c"># (a couple of warnings might appear but they should be harmless)</span>
+<span class="c"># We now need to add 'overlayfs' support as a module.</span>
+<span class="c"># The below command will start a terminal GUI, where you can browse the kernel config options</span>
+make <span class="nv">ARCH</span><span class="o">=</span>arm menuconfig
+<span class="c"># overlayfs is at 'File systems' → 'Overlay Filesystem Support' and must be set to 'M'</span>
+<span class="c"># hardware crypto module support is at ' Cryptographic API' → 'Hardware crypto devices' → 'Rockchip's Cryptographic Engine driver' and must be set to 'M'</span>
+
+<span class="c"># Compile kernel and its modules</span>
+make zImage <span class="nv">ARCH</span><span class="o">=</span>arm <span class="nv">CROSS_COMPILE</span><span class="o">=</span>arm-linux-gnueabihf- <span class="nt">-j16</span>
+make modules <span class="nv">ARCH</span><span class="o">=</span>arm <span class="nv">CROSS_COMPILE</span><span class="o">=</span>arm-linux-gnueabihf- <span class="nt">-j16</span>
+
+<span class="c"># Tinker's dts is in mainline kernel, under the name rk3288-tinker.dts</span>
+<span class="c"># (see: arm/boot/dts/rk3288-tinker.dts)</span>
+<span class="c"># so compile it as well to a dtb file (binary)</span>
+make <span class="nv">ARCH</span><span class="o">=</span>arm rk3288-tinker.dtb <span class="nv">CROSS_COMPILE</span><span class="o">=</span>arm-linux-gnueabihf- <span class="nt">-j16</span>
+
+<span class="c"># Install modules to the SDCard's '/' partition (adapt 'sdX' below)</span>
+<span class="nb">sudo </span>make <span class="nv">ARCH</span><span class="o">=</span>arm <span class="nv">INSTALL_MOD_PATH</span><span class="o">=</span>/media/sdX/ modules_install
+
+<span class="c"># Copy freshly compiled kernel to the SDcard's '/boot' partition (adapt 'sdY' below)</span>
+<span class="nb">cp arch</span>/arm/boot/zImage /media/sdY/zImage
+<span class="nb">cp arch</span>/arm/boot/dts/rk3288-tinker.dtb /media/sdY/rk3288-miniarm.dtb
+</code></pre></div></div>
+
+<p>🥳 Congratulations, your now have a freshly compiled kernel on your SD Card with <code class="language-plaintext highlighter-rouge">overlayfs</code> and <code class="language-plaintext highlighter-rouge">rk_crypto</code> support! 🎉</p>
+
+<h2 id="installing-debian-11-bullseye">Installing Debian 11 Bullseye</h2>
+<p>For this part, you’ll need to format (yes, format) the second partition made by copying the .img file. Prefer EXT4 filesystem.</p>
+
+<p>Once done, mount the partition in a temporary folder:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">mkdir</span> /tmp/os
+<span class="nb">sudo </span>mount /dev/sdb2 /tmp/os
+</code></pre></div></div>
+
+<p>And use <code class="language-plaintext highlighter-rouge">deboostrap</code> to install a fresh Debian stable. (<code class="language-plaintext highlighter-rouge">apt install debootstrap</code> might be necessary).</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># First Stage (downloading packages)</span>
+<span class="nb">sudo</span> /usr/sbin/debootstrap <span class="nt">--arch</span> armhf <span class="nt">--foreign</span> stable /tmp/os https://deb.debian.org/debian/
+
+<span class="c"># Second stage (unpacking packages in a chrooted env):</span>
+<span class="c"># as the target arch is different, needed to use qemu to chroot</span>
+<span class="nb">sudo </span>apt <span class="nb">install </span>qemu-user-static
+<span class="nb">sudo cp</span> /usr/bin/qemu-arm-static /tmp/os/usr/bin/
+<span class="nb">sudo chroot</span> /tmp/os /usr/bin/qemu-arm-static /bin/bash <span class="nt">-i</span>
+
+<span class="c"># When chrooted, run the second stage</span>
+<span class="c">#  /debootstrap/debootstrap --second-stage</span>
+</code></pre></div></div>
+
+<h4 id="minimal-configuration">Minimal configuration</h4>
+<p>Still in the chrooted environment,</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Update root password</span>
+passwd
+
+<span class="c"># Specify hostname</span>
+nano /etc/hostname
+
+<span class="c"># Modify FSTAB</span>
+<span class="c"># Add the following lines (mind the tabs):</span>
+<span class="c"># /dev/mmcblk0p2	/	ext4	defaults	0	1</span>
+<span class="c"># /dev/mmcblk0p1	/boot	vfat	defaults	0	2</span>
+nano /etc/fstab 
+
+<span class="c"># Enable serial console</span>
+systemctl <span class="nb">enable </span>serial-getty@ttyS0.service
+
+<span class="c"># Configure locales</span>
+apt <span class="nb">install </span>locales
+
+apt update
+apt <span class="nb">install </span>git openssh-server vim firmware-linux firmware-linux-nonfree firmware-linux-free firmware-realtek firmware-iwlwifi cron acl build-essential debian-keyring initramfs-tools autoconf automake libtool <span class="nb">sudo </span>ufw curl lsb-release cryptsetup cryptsetup-bin unzip curl
+
+useradd <span class="nt">-m</span> sheeva
+<span class="nb">echo</span> <span class="s2">"sheeva:monpassword"</span> | chpasswd
+adduser sheeva <span class="nb">sudo
+</span>dpkg-reconfigure locales
+vim /etc/ssh/sshd_config
+</code></pre></div></div>
+
+<h5 id="upgrading-source-list">Upgrading Source list:</h5>
+<p>update <code class="language-plaintext highlighter-rouge">/etc/apt/sources.list</code> with the following content:</p>
+
+<div class="language-conf highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">deb</span> <span class="n">http</span>://<span class="n">deb</span>.<span class="n">debian</span>.<span class="n">org</span>/<span class="n">debian</span>/ <span class="n">stable</span> <span class="n">main</span> <span class="n">contrib</span> <span class="n">non</span>-<span class="n">free</span>
+<span class="n">deb</span>-<span class="n">src</span> <span class="n">http</span>://<span class="n">deb</span>.<span class="n">debian</span>.<span class="n">org</span>/<span class="n">debian</span>/ <span class="n">stable</span> <span class="n">main</span> <span class="n">contrib</span> <span class="n">non</span>-<span class="n">free</span>
+
+<span class="n">deb</span> <span class="n">http</span>://<span class="n">deb</span>.<span class="n">debian</span>.<span class="n">org</span>/<span class="n">debian</span>/ <span class="n">stable</span>-<span class="n">updates</span> <span class="n">main</span> <span class="n">contrib</span> <span class="n">non</span>-<span class="n">free</span>
+<span class="n">deb</span>-<span class="n">src</span> <span class="n">http</span>://<span class="n">deb</span>.<span class="n">debian</span>.<span class="n">org</span>/<span class="n">debian</span>/ <span class="n">stable</span>-<span class="n">updates</span> <span class="n">main</span> <span class="n">contrib</span> <span class="n">non</span>-<span class="n">free</span>
+
+<span class="c"># Added from https://wiki.debian.org/Backports#Using_the_command_line
+</span><span class="n">deb</span> <span class="n">http</span>://<span class="n">deb</span>.<span class="n">debian</span>.<span class="n">org</span>/<span class="n">debian</span> <span class="n">bullseye</span>-<span class="n">backports</span> <span class="n">main</span> <span class="n">contrib</span> <span class="n">non</span>-<span class="n">free</span>
+</code></pre></div></div>
+
+<h5 id="setting-up-a-static-ip-address">Setting up a static IP address</h5>
+<p>As this SBC will become a Nextcloud server, it’s better to assign it a fixed IP. Add the following in <code class="language-plaintext highlighter-rouge">/etc/network/interfaces.d/eth0</code> (file won’t exist):</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>auto eth0
+iface eth0 inet static
+address 192.168.1.XXX
+netmask 255.255.255.0
+network 192.168.1.0
+broadcast 192.168.1.255
+gateway 192.168.1.1
+</code></pre></div></div>
+<p><code class="language-plaintext highlighter-rouge">/etc/network/interfaces</code> imports <code class="language-plaintext highlighter-rouge">/etc/network/interfaces.d/*</code>, names doesn’t matter.
+Replace <code class="language-plaintext highlighter-rouge">XXX</code> with the actual IP address you want to assign your board.</p>
+
+<h5 id="securing-ssh">Securing SSH</h5>
+<p>Only allow connection via <code class="language-plaintext highlighter-rouge">$MYUSER</code>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>vim /etc/ssh/sshd_config
+
+<span class="c"># Add/Modify the following directives:</span>
+AllowUsers MYUSER
+PermitRootLogin no
+</code></pre></div></div>
+<p>Other ssh tweaks can be found <a href="https://www.digitalocean.com/community/tutorials/ssh-essentials-working-with-ssh-servers-clients-and-keys">here</a>.</p>
+
+<p>🥳 Congratulations, your now have a freshly installed Debian stable on your SD Card! 🎉</p>
+
+<h2 id="next">Next</h2>
+
+<p>See <a href="/self-hosted-nextcloud-on-sbc-complete-guide-part2">PART 2</a></p>
+
+  </div>
+
+  <script src="https://utteranc.es/client.js"
+    repo="dvergeylen/dvergeylen.github.io"
+    issue-term="og:title"
+    label="discussion"
+    theme="github-light"
+    crossorigin="anonymous" async>
+    </script>
+
+  <a class="u-url" href="/self-hosted-nextcloud-on-sbc-complete-guide-part1" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Daniel Vergeylen</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Daniel Vergeylen</li><li><a class="u-email" href="mailto:blog@sigmadelta.io">blog@sigmadelta.io</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/dvergeylen"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">dvergeylen</span></a></li><li><a href="https://www.twitter.com/dvergeylen"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">dvergeylen</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Embedded HW/SW, Linux stuff and programming. Always learning!</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
